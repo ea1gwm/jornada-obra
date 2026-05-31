@@ -1,0 +1,28 @@
+{
+  "name": "Jornada Obra",
+  "short_name": "Jornada",
+  "description": "Calculadora de jornada laboral con tiempos de desplazamiento",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f3d7.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f3d7.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f3d7.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
