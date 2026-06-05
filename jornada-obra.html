@@ -10,6 +10,8 @@
 <meta name="theme-color" content="#0f1115">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root {
   --bg:#1a1d24; --surface:#14171f; --surface2:#1f2530; --surface3:#0f1115;
@@ -21,12 +23,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
 
-#header{position:sticky;top:0;z-index:10;background:var(--surface3);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:12px}
+#header{position:sticky;top:0;z-index:10;background:var(--surface3);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px}
 .header-icon{font-size:1.5rem;line-height:1}
 .header-title{font-size:1.05rem;font-weight:800;color:var(--accent-l);letter-spacing:-.2px}
-.header-sub{font-size:.68rem;color:var(--text3);letter-spacing:.06em;margin-top:2px;text-transform:uppercase}
+.header-sub{font-size:.66rem;color:var(--text3);letter-spacing:.05em;margin-top:2px;text-transform:uppercase}
 #header-badge{margin-left:auto;font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(37,99,235,.15);color:var(--accent-l);border:1px solid rgba(37,99,235,.3)}
 #header-badge.vie{background:rgba(251,146,60,.15);color:var(--orange);border-color:rgba(251,146,60,.3)}
+.gear{width:40px;height:40px;flex-shrink:0;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer}
+.gear:active{background:var(--surface)}
 
 #wrap{max-width:520px;margin:0 auto;padding:18px 14px 70px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px}
@@ -52,30 +56,31 @@ input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--acc
 input[type=time]{color-scheme:dark;width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--accent-l);font-size:2.5rem;font-family:ui-monospace,'Segoe UI Mono',monospace;font-weight:700;padding:12px 16px;text-align:center;letter-spacing:.05em;transition:border-color .2s}
 input[type=time]:focus{border-color:var(--accent);outline:none}
 
-/* Ubicaciones */
 .loc-row{display:flex;gap:8px;align-items:stretch}
 .loc-row input[type=text]{flex:1;min-width:0;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:ui-monospace,'Segoe UI Mono',monospace;font-size:.85rem;padding:11px 12px;outline:none;transition:border-color .2s}
 .loc-row input[type=text]:focus{border-color:var(--accent)}
-.loc-gps{width:52px;flex-shrink:0;border-radius:var(--r);background:var(--accent);color:#fff;font-size:1.15rem;border:none;cursor:pointer;transition:background .15s}
-.loc-gps:active{background:var(--accent-h)}
-.loc-status{font-size:.7rem;margin-top:5px;min-height:1em;color:var(--text3)}
+.loc-gps{width:52px;flex-shrink:0;border-radius:var(--r);background:var(--surface2);color:var(--text);font-size:1.15rem;border:1px solid var(--border);cursor:pointer}
+.loc-gps:active{background:var(--surface)}
+.map-pick{width:100%;margin-top:8px;padding:12px;border-radius:var(--r);background:var(--accent);color:#fff;font-family:var(--font);font-weight:700;font-size:.85rem;border:none;cursor:pointer}
+.map-pick:active{background:var(--accent-h)}
+.loc-status{font-size:.7rem;margin-top:6px;min-height:1em;color:var(--text3)}
 .loc-status.ok{color:var(--green-l)}
 .loc-status.err{color:var(--danger)}
 
-/* Stepper */
+.num-in{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--accent-l);font-family:ui-monospace,'Segoe UI Mono',monospace;font-size:1.6rem;font-weight:700;padding:12px 16px;text-align:center;outline:none}
+.num-in:focus{border-color:var(--accent)}
+
 .stepper{display:flex;align-items:center;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .stepper-btn{width:60px;height:56px;font-size:1.7rem;font-weight:300;background:transparent;color:var(--text2);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:background .1s,color .1s;font-family:var(--font)}
 .stepper-btn:active{background:rgba(37,99,235,.15);color:var(--accent-l)}
 .stepper-sep{width:1px;height:34px;background:var(--border);flex-shrink:0}
 .stepper-val{flex:1;text-align:center;font-size:1.4rem;font-weight:700;color:var(--text);font-family:ui-monospace,'Segoe UI Mono',monospace}
 
-/* Trip rows */
 .trip-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface3);border-radius:var(--r);padding:11px 14px;font-size:.85rem}
 .trip-row .tr-lbl{color:var(--text2);font-weight:600}
 .trip-row .tr-val{color:var(--accent-l);font-weight:700;font-family:ui-monospace,'Segoe UI Mono',monospace}
 .trip-row .tr-val.home{color:var(--green-l)}
 
-/* Nav buttons */
 .nav-btns{display:flex;gap:8px;margin-bottom:12px}
 .nav-btn{flex:1;padding:14px 6px;border-radius:var(--r-lg);font-family:var(--font);font-weight:700;font-size:.8rem;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s}
 .nav-btn:active{transform:scale(.96)}
@@ -84,7 +89,6 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
 .nav-btn.casa{border-color:rgba(16,185,129,.4)}
 .nav-btn.base{border-color:rgba(37,99,235,.4)}
 
-/* Timeline */
 .trow{display:flex;align-items:center;gap:14px;padding:12px 0;border-left:3px solid var(--border);padding-left:16px;margin-left:14px}
 .trow.highlight{border-left-color:var(--green)}
 .trow.official{border-left-color:var(--accent)}
@@ -111,6 +115,20 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
 .footer{text-align:center;margin-top:30px;font-size:.62rem;color:var(--text3);line-height:2.2}
 .footer strong{color:var(--accent-l)}
 #wh-opciones{display:none}
+
+/* Overlays (ajustes + mapa) */
+.overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;flex-direction:column}
+.overlay.open{display:flex}
+.ov-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface3);border-bottom:1px solid var(--border);font-weight:800;font-size:1rem;color:var(--accent-l)}
+.ov-x{width:38px;height:38px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.1rem;cursor:pointer}
+.ov-body{flex:1;overflow-y:auto;padding:16px 14px;max-width:520px;width:100%;margin:0 auto}
+#map{flex:1;width:100%;background:#222}
+.map-foot{background:var(--surface3);border-top:1px solid var(--border);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.map-coords{font-family:ui-monospace,'Segoe UI Mono',monospace;font-size:.85rem;color:var(--text2);text-align:center}
+.map-btn{flex:1;padding:14px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-weight:700;font-size:.9rem;cursor:pointer}
+.map-btn.primary{background:var(--green);border-color:var(--green);color:#04140d}
+.map-btn:disabled{opacity:.4}
+.leaflet-container{background:#222}
 </style>
 </head>
 <body>
@@ -119,9 +137,10 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
   <div class="header-icon">🏗️</div>
   <div>
     <div class="header-title">Jornada Obra</div>
-    <div class="header-sub">Control de tiempos · Obra &amp; Desplazamiento</div>
+    <div class="header-sub">Obra &amp; Desplazamiento</div>
   </div>
   <div id="header-badge">8h · Lun–Jue</div>
+  <button class="gear" id="btn-settings" title="Ajustes">⚙️</button>
 </div>
 
 <div id="wrap">
@@ -163,55 +182,32 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
     </div>
   </div>
 
-  <!-- UBICACIONES -->
-  <div class="card">
-    <div class="card-head">📍 Ubicaciones guardadas</div>
-    <div class="pad" style="display:flex;flex-direction:column;gap:16px">
-      <div>
-        <span class="lbl">🏢 Base de la empresa</span>
-        <div class="loc-row">
-          <input type="text" id="in-base" placeholder="lat, lon  ·  o pega enlace de Maps">
-          <button class="loc-gps" id="gps-base" title="Usar mi ubicación">📍</button>
-        </div>
-        <div class="loc-status" id="st-base"></div>
-      </div>
-      <div>
-        <span class="lbl">🏠 Tu casa</span>
-        <div class="loc-row">
-          <input type="text" id="in-casa" placeholder="lat, lon  ·  o pega enlace de Maps">
-          <button class="loc-gps" id="gps-casa" title="Usar mi ubicación">📍</button>
-        </div>
-        <div class="loc-status" id="st-casa"></div>
-      </div>
-      <div style="font-size:.7rem;color:var(--text3);line-height:1.5">Ponte en el sitio y pulsa 📍 para guardarlo. Se quedan guardadas en este móvil.</div>
-    </div>
-  </div>
-
   <!-- OBRA HOY -->
   <div class="card">
     <div class="card-head" id="obra-head">🏗️ Obra de hoy</div>
     <div class="pad">
       <span class="lbl" id="llegada-lbl">Hora de llegada a obra</span>
       <input type="time" id="arrival" value="08:00">
-      <span class="lbl" style="margin-top:16px">Ubicación de la obra</span>
+      <span class="lbl" style="margin-top:16px">Lugar de trabajo (destino)</span>
       <div class="loc-row">
-        <input type="text" id="in-obra" placeholder="lat, lon  ·  o 📍 al llegar">
-        <button class="loc-gps" id="gps-obra" title="Estoy en la obra">📍</button>
+        <input type="text" id="in-obra" placeholder="lat, lon">
+        <button class="loc-gps" id="gps-obra" title="Estoy aquí">📍</button>
       </div>
+      <button class="map-pick" id="map-obra">🗺️ Marcar destino en el mapa</button>
       <div class="loc-status" id="st-obra"></div>
     </div>
   </div>
 
   <!-- VIAJE -->
   <div class="card">
-    <div class="card-head">🚗 Desplazamiento · a 90 km/h máx.</div>
+    <div class="card-head" id="viaje-head">🚗 Desplazamiento · 90 km/h</div>
     <div class="pad" style="display:flex;flex-direction:column;gap:12px">
       <div class="trip-row">
-        <span class="tr-lbl">🏢 ↔ 🏗️ Empresa–Obra</span>
+        <span class="tr-lbl">🏢 ➜ 🏗️ Empresa–Obra</span>
         <span class="tr-val" id="trip-work">— · 60 min</span>
       </div>
       <div>
-        <span class="lbl">Minutos empresa↔obra (ajústalo si hace falta)</span>
+        <span class="lbl">Minutos (ajústalo si la ruta real difiere)</span>
         <div class="stepper">
           <button class="stepper-btn" id="btn-minus">−</button>
           <div class="stepper-sep"></div>
@@ -243,19 +239,72 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
 
   <div class="footer">
     Lun–Jue: 8h &nbsp;·&nbsp; Viernes: 7h &nbsp;·&nbsp; La jornada cuenta desde obra<br>
-    Creado por <strong>Braulio</strong> · v3.0
+    Creado por <strong>Braulio</strong> · v4.0
   </div>
 
 </div>
 
+<!-- ════ AJUSTES ════ -->
+<div id="settings" class="overlay">
+  <div class="ov-head"><span>⚙️ Ajustes</span><button class="ov-x" id="set-close">✕</button></div>
+  <div class="ov-body">
+    <div class="card">
+      <div class="card-head">🏠 Tu casa</div>
+      <div class="pad">
+        <div class="loc-row">
+          <input type="text" id="in-casa" placeholder="lat, lon">
+          <button class="loc-gps" id="gps-casa" title="Estoy en casa">📍</button>
+        </div>
+        <button class="map-pick" id="map-casa">🗺️ Marcar en el mapa</button>
+        <div class="loc-status" id="st-casa"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🏢 Base de la empresa</div>
+      <div class="pad">
+        <div class="loc-row">
+          <input type="text" id="in-base" placeholder="lat, lon">
+          <button class="loc-gps" id="gps-base" title="Estoy en la empresa">📍</button>
+        </div>
+        <button class="map-pick" id="map-base">🗺️ Marcar en el mapa</button>
+        <div class="loc-status" id="st-base"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🚦 Velocidad máxima</div>
+      <div class="pad">
+        <span class="lbl">Para estimar los minutos de viaje (km/h)</span>
+        <input type="number" id="in-speed" class="num-in" value="90" min="20" max="130" step="5">
+        <div style="font-size:.7rem;color:var(--text3);line-height:1.5;margin-top:10px">Los minutos se calculan como distancia ÷ velocidad. Si pones menos km/h, saldrán más minutos.</div>
+      </div>
+    </div>
+    <div style="font-size:.66rem;color:var(--text3);text-align:center;line-height:1.8;margin-top:6px">
+      Los puntos y la velocidad se guardan en este móvil.<br>El mapa necesita conexión la primera vez.
+    </div>
+  </div>
+</div>
+
+<!-- ════ MAPA ════ -->
+<div id="map-modal" class="overlay">
+  <div class="ov-head"><span id="map-title">Marca el punto</span><button class="ov-x" id="map-close">✕</button></div>
+  <div id="map"></div>
+  <div class="map-foot">
+    <div class="map-coords" id="map-coords">Toca el mapa para colocar el punto</div>
+    <div style="display:flex;gap:8px">
+      <button class="map-btn" id="map-gps">📍 Mi ubicación</button>
+      <button class="map-btn primary" id="map-confirm" disabled>Guardar punto</button>
+    </div>
+  </div>
+</div>
+
 <script>
-var STEP=5, MIN_T=5, MAX_T=240, SPEED=90, ROAD=1.3;
+var STEP=5, MIN_T=5, MAX_T=300, ROAD=1.3;
 
 var state = {
   diaIdx: diaHoy(), arrival:"08:00",
   lunch:false, wh:false, whWhen:"inicio",
   base:null, casa:null, obra:null,
-  workManual:null   // si el usuario ajusta a mano los minutos empresa↔obra
+  speed:90, workManual:null
 };
 
 // ── localStorage ──────────────────────────────────────────
@@ -263,9 +312,10 @@ function load(){
   try{
     var b=localStorage.getItem("jornada_base"); if(b) state.base=JSON.parse(b);
     var c=localStorage.getItem("jornada_casa"); if(c) state.casa=JSON.parse(c);
+    var s=localStorage.getItem("jornada_speed"); if(s) state.speed=+s;
   }catch(e){}
 }
-function save(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function save(key,val){ try{ localStorage.setItem(key, typeof val==="object"?JSON.stringify(val):val); }catch(e){} }
 
 // ── Utils ─────────────────────────────────────────────────
 function diaHoy(){ var d=new Date().getDay(); return (d>=1&&d<=5)?d-1:0; }
@@ -281,9 +331,8 @@ function haversine(a,b){
   return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
 }
 function roadKm(a,b){ return a&&b ? haversine(a,b)*ROAD : null; }
-function kmToMin(km){ return Math.max(MIN_T, Math.round((km/SPEED*60)/5)*5); }
+function kmToMin(km){ return Math.max(MIN_T, Math.round((km/(state.speed||90)*60)/5)*5); }
 
-// parse "lat, lon" o enlace de Google Maps
 function parseLoc(txt){
   if(!txt) return null;
   var at=txt.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -301,13 +350,13 @@ function calcTrips(){
   return {kmW:kmW, tW:tW, kmH:kmH, tH:tH};
 }
 
-// ── Cálculo de jornada (Modelo: cuenta desde obra) ────────
+// ── Cálculo (la jornada cuenta desde la llegada a obra) ───
 function calculate(){
   var s=state, arr=toMins(s.arrival);
   var WD=(s.diaIdx===4?7:8)*60, lunchM=s.lunch?60:0;
   var t=calcTrips();
-  var finBase = arr + WD + lunchM;   // FIN DE JORNADA oficial: llegas a la base
-  var leave   = finBase - t.tW;      // sales de obra (la vuelta cuenta como jornada)
+  var finBase = arr + WD + lunchM;   // fin de jornada oficial (vuelta a la base)
+  var leave   = finBase - t.tW;      // sales de obra
   var homeReal= leave + t.tH;        // llegada real a tu casa (informativa)
   var onSite  = leave - arr;
   return {
@@ -322,8 +371,7 @@ function render(){
   var s=state, isVie=s.diaIdx===4, whStart=s.wh&&s.whWhen==="inicio", r=calculate();
 
   var badge=document.getElementById("header-badge");
-  badge.textContent = isVie?"7h · Viernes":"8h · Lun–Jue";
-  badge.className = isVie?"vie":"";
+  badge.textContent=isVie?"7h · Viernes":"8h · Lun–Jue"; badge.className=isVie?"vie":"";
 
   document.querySelectorAll(".dia-btn").forEach(function(b){
     var i=+b.getAttribute("data-i");
@@ -345,59 +393,49 @@ function render(){
     ? "Pon la hora de llegada al almacén: la jornada arranca ahí. La empresa te abona los 30 min de la mañana."
     : "Terminas en el almacén; la vuelta desde el almacén cuenta como jornada.";
 
-  document.getElementById("obra-head").innerHTML = "🏗️ " + (whStart?"Almacén de hoy":"Obra de hoy");
-  document.getElementById("llegada-lbl").textContent = whStart?"Hora de llegada al almacén":"Hora de llegada a obra";
+  document.getElementById("obra-head").innerHTML="🏗️ "+(whStart?"Almacén de hoy":"Obra de hoy");
+  document.getElementById("llegada-lbl").textContent=whStart?"Hora de llegada al almacén":"Hora de llegada a obra";
+  document.getElementById("viaje-head").textContent="🚗 Desplazamiento · "+(s.speed||90)+" km/h";
 
-  // Ubicaciones status
-  locStatus("base", s.base);
-  locStatus("casa", s.casa);
-  locStatus("obra", s.obra);
+  locStatus("base",s.base); locStatus("casa",s.casa); locStatus("obra",s.obra);
 
-  // Viaje
-  document.getElementById("val-work").textContent = r.tW+" min";
-  document.getElementById("trip-work").textContent = (r.kmW!=null?(Math.round(r.kmW)+" km · "):"") + r.tW+" min";
-  document.getElementById("trip-home").textContent = (r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ") + r.tH+" min";
+  document.getElementById("val-work").textContent=r.tW+" min";
+  document.getElementById("trip-work").textContent=(r.kmW!=null?(Math.round(r.kmW)+" km · "):"")+r.tW+" min";
+  document.getElementById("trip-home").textContent=(r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ")+r.tH+" min";
 
-  // Timeline
-  var subLunch = s.lunch?" (incl. 1h comida)":"";
-  var startIcon = whStart?"🏭":"🏗️";
-  var startLbl  = whStart?"Llegas al almacén":"Llegas a obra";
-  var leaveLbl  = (s.wh&&s.whWhen==="final")?"Sales del almacén":"Sales de obra";
+  var subLunch=s.lunch?" (incl. 1h comida)":"";
+  var startIcon=whStart?"🏭":"🏗️", startLbl=whStart?"Llegas al almacén":"Llegas a obra";
+  var leaveLbl=(s.wh&&s.whWhen==="final")?"Sales del almacén":"Sales de obra";
   document.getElementById("timeline").innerHTML =
-    trow(startIcon, startLbl, r.arr, "Empieza a contar la jornada", "") +
-    tdiv("En el tajo: "+fmt(r.onSite)+subLunch, true) +
-    trow("🚪", leaveLbl, r.leave, "La vuelta ("+r.tW+" min) cuenta como jornada", "highlight") +
-    tdiv("Vuelta a la base "+r.tW+" min — Empresa: "+r.cRet+"min / Tú: "+r.pRet+"min", false) +
-    trow("🏁", "Fin de jornada (base)", r.finBase, "Hora oficial de fin de trabajo", "official") +
-    trow("🏠", "Llegas a tu casa", r.homeReal, "Informativo · NO es el fin de jornada", "");
+    trow(startIcon,startLbl,r.arr,"Empieza a contar la jornada","") +
+    tdiv("En el tajo: "+fmt(r.onSite)+subLunch,true) +
+    trow("🚪",leaveLbl,r.leave,"La vuelta ("+r.tW+" min) cuenta como jornada","highlight") +
+    tdiv("Vuelta a la base "+r.tW+" min — Empresa: "+r.cRet+"min / Tú: "+r.pRet+"min",false) +
+    trow("🏁","Fin de jornada (base)",r.finBase,"Hora oficial de fin de trabajo","official") +
+    trow("🏠","Llegas a tu casa",r.homeReal,"Informativo · NO es el fin de jornada","");
 
-  // Stats
   document.getElementById("stats").innerHTML =
     stat("Jornada", isVie?"7h (viernes)":"8h", isVie?"var(--orange)":"var(--accent-l)") +
     stat("Comida", s.lunch?"1h (no computa)":"Sin parada", s.lunch?"var(--danger)":"var(--text3)") +
     stat("Sales de obra", r.leave, "var(--green-l)") +
     stat("Fin jornada (base)", r.finBase, "var(--accent-l)") +
     stat("Llegas a tu casa", r.homeReal, "var(--green-l)") +
-    stat("Empresa te abona (mañana)", fmt(r.owe), "var(--accent-l)");
+    stat("Empresa te abona", fmt(r.owe), "var(--accent-l)");
 }
 
-function locStatus(which, loc){
-  var el=document.getElementById("st-"+which);
-  var inp=document.getElementById("in-"+which);
+function locStatus(which,loc){
+  var el=document.getElementById("st-"+which), inp=document.getElementById("in-"+which);
+  if(!el) return;
   if(loc){
     el.textContent="✓ Guardada: "+loc.lat.toFixed(5)+", "+loc.lon.toFixed(5);
     el.className="loc-status ok";
-    if(document.activeElement!==inp) inp.value=loc.lat.toFixed(6)+", "+loc.lon.toFixed(6);
-  } else {
-    el.textContent=""; el.className="loc-status";
-  }
+    if(inp && document.activeElement!==inp) inp.value=loc.lat.toFixed(6)+", "+loc.lon.toFixed(6);
+  } else { el.textContent=""; el.className="loc-status"; }
 }
 
 function trow(icon,label,time,sub,cls){
-  return '<div class="trow'+(cls?" "+cls:"")+'">'+
-    '<span class="trow-icon">'+icon+'</span>'+
-    '<div><div class="trow-label">'+label+'</div>'+
-    '<div class="trow-time">'+time+'</div>'+
+  return '<div class="trow'+(cls?" "+cls:"")+'"><span class="trow-icon">'+icon+'</span>'+
+    '<div><div class="trow-label">'+label+'</div><div class="trow-time">'+time+'</div>'+
     (sub?'<div class="trow-sub">'+sub+'</div>':'')+'</div></div>';
 }
 function tdiv(label,isWork){ return '<div class="tdiv'+(isWork?" work":"")+'"><div class="tdiv-txt">'+label+'</div></div>'; }
@@ -406,29 +444,58 @@ function stat(label,value,color){
     '<div class="stat-val" style="color:'+color+'">'+value+'</div></div>';
 }
 
-// ── Ubicaciones: capturar / escribir ──────────────────────
-function setLoc(which, loc){
+// ── Guardar ubicaciones ───────────────────────────────────
+function setLoc(which,loc){
   state[which]=loc;
   if(which==="base") save("jornada_base",loc);
   if(which==="casa") save("jornada_casa",loc);
-  if(which==="obra" || which==="base") state.workManual=null; // recalcula minutos
+  if(which==="obra"||which==="base") state.workManual=null;
   render();
 }
 function capturar(which){
   var el=document.getElementById("st-"+which);
-  if(!navigator.geolocation){ el.textContent="Este móvil no tiene GPS disponible"; el.className="loc-status err"; return; }
+  if(!navigator.geolocation){ el.textContent="Este móvil no tiene GPS"; el.className="loc-status err"; return; }
   el.textContent="Obteniendo ubicación…"; el.className="loc-status";
   navigator.geolocation.getCurrentPosition(function(p){
-    setLoc(which, {lat:p.coords.latitude, lon:p.coords.longitude});
-  }, function(err){
-    el.textContent="No se pudo ("+err.message+"). Escribe lat, lon a mano.";
+    setLoc(which,{lat:p.coords.latitude,lon:p.coords.longitude});
+  },function(err){
+    el.textContent="No se pudo ("+err.message+"). Escribe lat, lon o usa el mapa.";
     el.className="loc-status err";
-  }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:0});
 }
-function navTo(loc, nombre){
+function navTo(loc,nombre){
   if(!loc){ alert("Primero guarda la ubicación de "+nombre+"."); return; }
   window.open("https://www.google.com/maps/dir/?api=1&destination="+loc.lat+","+loc.lon+"&travelmode=driving","_blank");
 }
+
+// ── MAPA ──────────────────────────────────────────────────
+var lmap=null, tmpMarker=null, ltemp=null, mapTarget=null;
+function openMap(target){
+  if(typeof L==="undefined"){ alert("El mapa necesita conexión a internet la primera vez."); return; }
+  mapTarget=target; ltemp=null;
+  document.getElementById("map-modal").classList.add("open");
+  document.getElementById("map-title").textContent="Marca "+(target==="casa"?"tu casa":target==="base"?"la base de la empresa":"el lugar de trabajo");
+  document.getElementById("map-confirm").disabled=true;
+  document.getElementById("map-coords").textContent="Toca el mapa para colocar el punto";
+  if(!lmap){
+    lmap=L.map("map").setView([40.4168,-3.7038],6);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(lmap);
+    lmap.on("click",function(e){ placeTemp(e.latlng.lat,e.latlng.lng); });
+  }
+  if(tmpMarker){ lmap.removeLayer(tmpMarker); tmpMarker=null; }
+  var ex=state[target];
+  if(ex){ lmap.setView([ex.lat,ex.lon],14); placeTemp(ex.lat,ex.lon); }
+  else if(state.base){ lmap.setView([state.base.lat,state.base.lon],11); }
+  setTimeout(function(){ lmap.invalidateSize(); },150);
+}
+function placeTemp(lat,lon){
+  ltemp={lat:lat,lon:lon};
+  if(tmpMarker) tmpMarker.setLatLng([lat,lon]);
+  else tmpMarker=L.circleMarker([lat,lon],{radius:10,color:"#2563eb",fillColor:"#60a5fa",fillOpacity:.9,weight:3}).addTo(lmap);
+  document.getElementById("map-confirm").disabled=false;
+  document.getElementById("map-coords").textContent=lat.toFixed(5)+", "+lon.toFixed(5);
+}
+function closeMap(){ document.getElementById("map-modal").classList.remove("open"); }
 
 // ── Eventos ───────────────────────────────────────────────
 document.querySelectorAll(".dia-btn").forEach(function(b){
@@ -444,6 +511,9 @@ document.getElementById("arrival").addEventListener("change",function(){ state.a
 document.getElementById("gps-base").addEventListener("click",function(){ capturar("base"); });
 document.getElementById("gps-casa").addEventListener("click",function(){ capturar("casa"); });
 document.getElementById("gps-obra").addEventListener("click",function(){ capturar("obra"); });
+document.getElementById("map-base").addEventListener("click",function(){ openMap("base"); });
+document.getElementById("map-casa").addEventListener("click",function(){ openMap("casa"); });
+document.getElementById("map-obra").addEventListener("click",function(){ openMap("obra"); });
 
 ["base","casa","obra"].forEach(function(w){
   document.getElementById("in-"+w).addEventListener("change",function(){
@@ -461,13 +531,32 @@ document.getElementById("nav-obra").addEventListener("click",function(){ navTo(s
 document.getElementById("nav-casa").addEventListener("click",function(){ navTo(state.casa,"tu casa"); });
 document.getElementById("nav-base").addEventListener("click",function(){ navTo(state.base,"la empresa"); });
 
+// Ajustes
+document.getElementById("btn-settings").addEventListener("click",function(){ document.getElementById("settings").classList.add("open"); });
+document.getElementById("set-close").addEventListener("click",function(){ document.getElementById("settings").classList.remove("open"); });
+document.getElementById("in-speed").addEventListener("change",function(){
+  var v=parseInt(this.value,10); if(isNaN(v)||v<10)v=90;
+  state.speed=v; state.workManual=null; save("jornada_speed",v); render();
+});
+
+// Mapa
+document.getElementById("map-close").addEventListener("click",closeMap);
+document.getElementById("map-confirm").addEventListener("click",function(){ if(ltemp) setLoc(mapTarget,ltemp); closeMap(); });
+document.getElementById("map-gps").addEventListener("click",function(){
+  if(!navigator.geolocation) return;
+  document.getElementById("map-coords").textContent="Obteniendo ubicación…";
+  navigator.geolocation.getCurrentPosition(function(p){
+    lmap.setView([p.coords.latitude,p.coords.longitude],15);
+    placeTemp(p.coords.latitude,p.coords.longitude);
+  },function(){ document.getElementById("map-coords").textContent="No se pudo obtener tu ubicación"; },{enableHighAccuracy:true,timeout:10000});
+});
+
 // ── Init ──────────────────────────────────────────────────
 load();
+document.getElementById("in-speed").value=state.speed;
 render();
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(function(){});
-}
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
 </script>
 </body>
 </html>
