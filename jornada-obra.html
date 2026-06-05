@@ -122,6 +122,11 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
 .ov-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface3);border-bottom:1px solid var(--border);font-weight:800;font-size:1rem;color:var(--accent-l)}
 .ov-x{width:38px;height:38px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.1rem;cursor:pointer}
 .ov-body{flex:1;overflow-y:auto;padding:16px 14px;max-width:520px;width:100%;margin:0 auto}
+.map-search{display:flex;gap:8px;padding:10px 14px;background:var(--surface3);border-bottom:1px solid var(--border)}
+.map-search input{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.9rem;padding:11px 12px;outline:none}
+.map-search input:focus{border-color:var(--accent)}
+.map-search button{width:52px;flex-shrink:0;border-radius:var(--r);background:var(--accent);color:#fff;border:none;font-size:1.1rem;cursor:pointer}
+.map-search button:active{background:var(--accent-h)}
 #map{flex:1;width:100%;background:#222}
 .map-foot{background:var(--surface3);border-top:1px solid var(--border);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .map-coords{font-family:ui-monospace,'Segoe UI Mono',monospace;font-size:.85rem;color:var(--text2);text-align:center}
@@ -287,6 +292,10 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
 <!-- ════ MAPA ════ -->
 <div id="map-modal" class="overlay">
   <div class="ov-head"><span id="map-title">Marca el punto</span><button class="ov-x" id="map-close">✕</button></div>
+  <div class="map-search">
+    <input type="text" id="map-q" placeholder="Buscar dirección, pueblo o calle…" autocomplete="off">
+    <button id="map-q-btn" title="Buscar">🔍</button>
+  </div>
   <div id="map"></div>
   <div class="map-foot">
     <div class="map-coords" id="map-coords">Toca el mapa para colocar el punto</div>
@@ -304,7 +313,8 @@ var state = {
   diaIdx: diaHoy(), arrival:"08:00",
   lunch:false, wh:false, whWhen:"inicio",
   base:null, casa:null, obra:null,
-  speed:90, workManual:null
+  speed:90, workManual:null,
+  osrm:{work:null, home:null}   // distancias reales por carretera (km), si hay conexión
 };
 
 // ── localStorage ──────────────────────────────────────────
@@ -344,10 +354,25 @@ function parseLoc(txt){
 
 // ── Trips ─────────────────────────────────────────────────
 function calcTrips(){
-  var kmW=roadKm(state.base,state.obra), kmH=roadKm(state.obra,state.casa);
+  var realW = state.osrm.work!=null, realH = state.osrm.home!=null;
+  var kmW = realW ? state.osrm.work : roadKm(state.base,state.obra);
+  var kmH = realH ? state.osrm.home : roadKm(state.obra,state.casa);
   var tW = state.workManual!=null ? state.workManual : (kmW!=null ? kmToMin(kmW) : 60);
   var tH = kmH!=null ? kmToMin(kmH) : tW;
-  return {kmW:kmW, tW:tW, kmH:kmH, tH:tH};
+  return {kmW:kmW, tW:tW, kmH:kmH, tH:tH, realW:realW, realH:realH};
+}
+
+// Ruta real por carretera (OSRM) — devuelve km al callback, o null si falla
+function fetchRoute(a,b,cb){
+  if(!a||!b){ cb(null); return; }
+  var url="https://router.project-osrm.org/route/v1/driving/"+a.lon+","+a.lat+";"+b.lon+","+b.lat+"?overview=false";
+  fetch(url).then(function(r){return r.json();}).then(function(d){
+    cb(d&&d.routes&&d.routes[0] ? d.routes[0].distance/1000 : null);
+  }).catch(function(){ cb(null); });
+}
+function updateRoutes(){
+  fetchRoute(state.base, state.obra, function(km){ if(km!=null){ state.osrm.work=km; state.workManual=null; render(); } });
+  fetchRoute(state.obra, state.casa, function(km){ if(km!=null){ state.osrm.home=km; render(); } });
 }
 
 // ── Cálculo (la jornada cuenta desde la llegada a obra) ───
@@ -362,7 +387,7 @@ function calculate(){
   return {
     arr:toTime(arr), leave:toTime(leave), finBase:toTime(finBase), homeReal:toTime(homeReal),
     onSite:onSite, cRet:Math.max(0,t.tW-30), pRet:30, owe:30,
-    tW:t.tW, tH:t.tH, kmW:t.kmW, kmH:t.kmH
+    tW:t.tW, tH:t.tH, kmW:t.kmW, kmH:t.kmH, realW:t.realW, realH:t.realH
   };
 }
 
@@ -400,8 +425,8 @@ function render(){
   locStatus("base",s.base); locStatus("casa",s.casa); locStatus("obra",s.obra);
 
   document.getElementById("val-work").textContent=r.tW+" min";
-  document.getElementById("trip-work").textContent=(r.kmW!=null?(Math.round(r.kmW)+" km · "):"")+r.tW+" min";
-  document.getElementById("trip-home").textContent=(r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ")+r.tH+" min";
+  document.getElementById("trip-work").textContent=(r.kmW!=null?(Math.round(r.kmW)+" km · "):"")+r.tW+" min"+(r.realW?" · carretera":(r.kmW!=null?" · aprox.":""));
+  document.getElementById("trip-home").textContent=(r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ")+r.tH+" min"+(r.realH?" · carretera":"");
 
   var subLunch=s.lunch?" (incl. 1h comida)":"";
   var startIcon=whStart?"🏭":"🏗️", startLbl=whStart?"Llegas al almacén":"Llegas a obra";
@@ -450,7 +475,9 @@ function setLoc(which,loc){
   if(which==="base") save("jornada_base",loc);
   if(which==="casa") save("jornada_casa",loc);
   if(which==="obra"||which==="base") state.workManual=null;
+  state.osrm.work=null; state.osrm.home=null;   // invalida rutas; se recalculan online
   render();
+  updateRoutes();
 }
 function capturar(which){
   var el=document.getElementById("st-"+which);
@@ -496,6 +523,17 @@ function placeTemp(lat,lon){
   document.getElementById("map-coords").textContent=lat.toFixed(5)+", "+lon.toFixed(5);
 }
 function closeMap(){ document.getElementById("map-modal").classList.remove("open"); }
+function geocode(q){
+  if(!q) return;
+  var el=document.getElementById("map-coords"); el.textContent="Buscando «"+q+"»…";
+  fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=es&q="+encodeURIComponent(q))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d[0]){ var la=+d[0].lat, lo=+d[0].lon; lmap.setView([la,lo],16); placeTemp(la,lo);
+        el.textContent=(d[0].display_name||"").slice(0,70); }
+      else el.textContent="No encontrado. Prueba con más detalle.";
+    }).catch(function(){ el.textContent="Sin conexión para buscar direcciones."; });
+}
 
 // ── Eventos ───────────────────────────────────────────────
 document.querySelectorAll(".dia-btn").forEach(function(b){
@@ -542,6 +580,8 @@ document.getElementById("in-speed").addEventListener("change",function(){
 // Mapa
 document.getElementById("map-close").addEventListener("click",closeMap);
 document.getElementById("map-confirm").addEventListener("click",function(){ if(ltemp) setLoc(mapTarget,ltemp); closeMap(); });
+document.getElementById("map-q-btn").addEventListener("click",function(){ geocode(document.getElementById("map-q").value.trim()); });
+document.getElementById("map-q").addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); geocode(this.value.trim()); } });
 document.getElementById("map-gps").addEventListener("click",function(){
   if(!navigator.geolocation) return;
   document.getElementById("map-coords").textContent="Obteniendo ubicación…";
@@ -555,6 +595,7 @@ document.getElementById("map-gps").addEventListener("click",function(){
 load();
 document.getElementById("in-speed").value=state.speed;
 render();
+updateRoutes();   // si ya hay casa/base guardadas, intenta ruta real al arrancar
 
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
 </script>
