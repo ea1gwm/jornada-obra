@@ -12,185 +12,105 @@
 <link rel="manifest" href="manifest.json">
 <style>
 :root {
-  --bg:       #1a1d24;
-  --surface:  #14171f;
-  --surface2: #1f2530;
-  --surface3: #0f1115;
-  --border:   #2a2f3a;
-  --accent:   #2563eb;
-  --accent-h: #1d4ed8;
-  --accent-l: #60a5fa;
-  --green:    #10b981;
-  --green-l:  #34d399;
-  --orange:   #fb923c;
-  --danger:   #ef4444;
-  --text:     #e5e7eb;
-  --text2:    #94a3b8;
-  --text3:    #6b7280;
-  --font:     -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --r:        8px;
-  --r-lg:     12px;
+  --bg:#1a1d24; --surface:#14171f; --surface2:#1f2530; --surface3:#0f1115;
+  --border:#2a2f3a; --accent:#2563eb; --accent-h:#1d4ed8; --accent-l:#60a5fa;
+  --green:#10b981; --green-l:#34d399; --orange:#fb923c; --danger:#ef4444;
+  --text:#e5e7eb; --text2:#94a3b8; --text3:#6b7280;
+  --font:-apple-system,'Segoe UI',Roboto,sans-serif; --r:8px; --r-lg:12px;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+#header{position:sticky;top:0;z-index:10;background:var(--surface3);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:12px}
+.header-icon{font-size:1.5rem;line-height:1}
+.header-title{font-size:1.05rem;font-weight:800;color:var(--accent-l);letter-spacing:-.2px}
+.header-sub{font-size:.68rem;color:var(--text3);letter-spacing:.06em;margin-top:2px;text-transform:uppercase}
+#header-badge{margin-left:auto;font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(37,99,235,.15);color:var(--accent-l);border:1px solid rgba(37,99,235,.3)}
+#header-badge.vie{background:rgba(251,146,60,.15);color:var(--orange);border-color:rgba(251,146,60,.3)}
 
-/* ── HEADER ─────────────────────────────────────────────── */
-#header {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--surface3); border-bottom: 1px solid var(--border);
-  padding: 12px 18px; display: flex; align-items: center; gap: 12px;
-}
-.header-icon { font-size: 1.5rem; line-height: 1; }
-.header-title { font-size: 1.05rem; font-weight: 800; color: var(--accent-l); letter-spacing: -0.2px; }
-.header-sub { font-size: .68rem; color: var(--text3); letter-spacing: .06em; margin-top: 2px; text-transform: uppercase; }
-#header-badge {
-  margin-left: auto; font-size: .72rem; font-weight: 600;
-  padding: 5px 11px; border-radius: 999px;
-  background: rgba(37,99,235,.15); color: var(--accent-l);
-  border: 1px solid rgba(37,99,235,.3);
-}
-#header-badge.vie {
-  background: rgba(251,146,60,.15); color: var(--orange);
-  border-color: rgba(251,146,60,.3);
-}
+#wrap{max-width:520px;margin:0 auto;padding:18px 14px 70px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px}
+.card-head{background:var(--surface3);border-bottom:1px solid var(--border);padding:10px 16px;font-size:.68rem;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.pad{padding:16px}
+.lbl{display:block;font-size:.7rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
 
-/* ── WRAP ───────────────────────────────────────────────── */
-#wrap { max-width: 520px; margin: 0 auto; padding: 18px 14px 70px; }
+.dia-btn{flex:1;padding:10px 4px;border-radius:var(--r);font-family:var(--font);font-weight:700;font-size:.72rem;background:var(--surface2);color:var(--text3);border:1px solid transparent;cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.dia-btn:active{transform:scale(.95)}
+.dia-btn.active-normal{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 10px rgba(37,99,235,.35)}
+.dia-btn.active-vie{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:0 2px 10px rgba(251,146,60,.35)}
 
-/* ── CARDS ──────────────────────────────────────────────── */
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-lg); overflow: hidden; margin-bottom: 12px;
-}
-.card-head {
-  background: var(--surface3); border-bottom: 1px solid var(--border);
-  padding: 10px 16px; font-size: .68rem; font-weight: 700;
-  color: var(--text3); letter-spacing: .1em; text-transform: uppercase;
-  display: flex; align-items: center; gap: 8px;
-}
-.pad { padding: 16px; }
+.check-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none;transition:all .2s}
+.check-row:active{opacity:.8}
+input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent);cursor:pointer}
+.check-text{font-size:.88rem;font-weight:500;line-height:1.3}
+.check-text .sub{display:block;font-size:.72rem;color:var(--text3);margin-top:2px}
 
-/* ── LABELS ─────────────────────────────────────────────── */
-.lbl {
-  display: block; font-size: .7rem; font-weight: 600;
-  color: var(--text2); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px;
-}
+.wh-btn{flex:1;padding:10px 6px;border-radius:var(--r);font-family:var(--font);font-weight:600;font-size:.8rem;background:var(--surface);color:var(--text2);border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.wh-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wh-btn:active{transform:scale(.96)}
 
-/* ── DIA BUTTONS ────────────────────────────────────────── */
-.dia-btn {
-  flex: 1; padding: 10px 4px; border-radius: var(--r);
-  font-family: var(--font); font-weight: 700; font-size: .72rem;
-  background: var(--surface2); color: var(--text3);
-  border: 1px solid transparent; cursor: pointer; transition: all .15s; letter-spacing: .04em;
-}
-.dia-btn:active { transform: scale(.95); }
-.dia-btn.active-normal { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 10px rgba(37,99,235,.35); }
-.dia-btn.active-vie    { background: var(--orange); color: #fff; border-color: var(--orange); box-shadow: 0 2px 10px rgba(251,146,60,.35); }
+input[type=time]{color-scheme:dark;width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--accent-l);font-size:2.5rem;font-family:ui-monospace,'Segoe UI Mono',monospace;font-weight:700;padding:12px 16px;text-align:center;letter-spacing:.05em;transition:border-color .2s}
+input[type=time]:focus{border-color:var(--accent);outline:none}
 
-/* ── CHECK ROWS ─────────────────────────────────────────── */
-.check-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 13px 14px; border-radius: var(--r);
-  border: 1px solid var(--border); background: var(--surface2);
-  cursor: pointer; user-select: none; transition: all .2s;
-}
-.check-row:active { opacity: .8; }
-input[type=checkbox] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
-.check-text { font-size: .88rem; font-weight: 500; line-height: 1.3; }
-.check-text .sub { display: block; font-size: .72rem; color: var(--text3); margin-top: 2px; }
+/* Ubicaciones */
+.loc-row{display:flex;gap:8px;align-items:stretch}
+.loc-row input[type=text]{flex:1;min-width:0;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:ui-monospace,'Segoe UI Mono',monospace;font-size:.85rem;padding:11px 12px;outline:none;transition:border-color .2s}
+.loc-row input[type=text]:focus{border-color:var(--accent)}
+.loc-gps{width:52px;flex-shrink:0;border-radius:var(--r);background:var(--accent);color:#fff;font-size:1.15rem;border:none;cursor:pointer;transition:background .15s}
+.loc-gps:active{background:var(--accent-h)}
+.loc-status{font-size:.7rem;margin-top:5px;min-height:1em;color:var(--text3)}
+.loc-status.ok{color:var(--green-l)}
+.loc-status.err{color:var(--danger)}
 
-/* ── WH BUTTONS ─────────────────────────────────────────── */
-.wh-btn {
-  flex: 1; padding: 10px 6px; border-radius: var(--r);
-  font-family: var(--font); font-weight: 600; font-size: .8rem;
-  background: var(--surface); color: var(--text2);
-  border: 1px solid var(--border); cursor: pointer; transition: all .15s;
-}
-.wh-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-.wh-btn:active { transform: scale(.96); }
+/* Stepper */
+.stepper{display:flex;align-items:center;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.stepper-btn{width:60px;height:56px;font-size:1.7rem;font-weight:300;background:transparent;color:var(--text2);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:background .1s,color .1s;font-family:var(--font)}
+.stepper-btn:active{background:rgba(37,99,235,.15);color:var(--accent-l)}
+.stepper-sep{width:1px;height:34px;background:var(--border);flex-shrink:0}
+.stepper-val{flex:1;text-align:center;font-size:1.4rem;font-weight:700;color:var(--text);font-family:ui-monospace,'Segoe UI Mono',monospace}
 
-/* ── TIME INPUT ─────────────────────────────────────────── */
-input[type=time] {
-  color-scheme: dark; width: 100%;
-  background: var(--surface3); border: 1px solid var(--border);
-  border-radius: var(--r); color: var(--accent-l);
-  font-size: 2.5rem; font-family: ui-monospace, 'Segoe UI Mono', monospace;
-  font-weight: 700; padding: 12px 16px; text-align: center;
-  letter-spacing: .05em; transition: border-color .2s;
-}
-input[type=time]:focus { border-color: var(--accent); outline: none; }
+/* Trip rows */
+.trip-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface3);border-radius:var(--r);padding:11px 14px;font-size:.85rem}
+.trip-row .tr-lbl{color:var(--text2);font-weight:600}
+.trip-row .tr-val{color:var(--accent-l);font-weight:700;font-family:ui-monospace,'Segoe UI Mono',monospace}
+.trip-row .tr-val.home{color:var(--green-l)}
 
-/* ── STEPPER ─────────────────────────────────────────────── */
-.stepper {
-  display: flex; align-items: center;
-  background: var(--surface3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden;
-}
-.stepper-btn {
-  width: 60px; height: 58px; font-size: 1.7rem; font-weight: 300;
-  background: transparent; color: var(--text2); border: none;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; cursor: pointer; transition: background .1s, color .1s;
-  font-family: var(--font);
-}
-.stepper-btn:active { background: rgba(37,99,235,.15); color: var(--accent-l); }
-.stepper-sep { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
-.stepper-val {
-  flex: 1; text-align: center; font-size: 1.45rem; font-weight: 700;
-  color: var(--text); font-family: ui-monospace, 'Segoe UI Mono', monospace;
-}
-.stepper-hint { display: flex; gap: 12px; margin-top: 7px; padding: 0 2px; }
-.stepper-hint .tu  { font-size: .73rem; color: var(--danger); }
-.stepper-hint .emp { font-size: .73rem; color: var(--green); }
+/* Nav buttons */
+.nav-btns{display:flex;gap:8px;margin-bottom:12px}
+.nav-btn{flex:1;padding:14px 6px;border-radius:var(--r-lg);font-family:var(--font);font-weight:700;font-size:.8rem;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s}
+.nav-btn:active{transform:scale(.96)}
+.nav-btn .ne{font-size:1.3rem}
+.nav-btn.obra{border-color:rgba(251,146,60,.4)}
+.nav-btn.casa{border-color:rgba(16,185,129,.4)}
+.nav-btn.base{border-color:rgba(37,99,235,.4)}
 
-/* ── TIMELINE ────────────────────────────────────────────── */
-.trow {
-  display: flex; align-items: center; gap: 14px;
-  padding: 12px 0; border-left: 3px solid var(--border);
-  padding-left: 16px; margin-left: 14px;
-}
-.trow.highlight { border-left-color: var(--green); }
-.trow-icon { font-size: 1.4rem; width: 28px; text-align: center; flex-shrink: 0; }
-.trow-label { font-size: .7rem; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
-.trow-time { font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1.1; font-family: ui-monospace, 'Segoe UI Mono', monospace; }
-.trow.highlight .trow-time { font-size: 2.3rem; color: var(--green-l); }
-.trow-sub { font-size: .68rem; color: var(--text3); margin-top: 3px; }
-.tdiv { margin-left: 28px; border-left: 3px solid var(--border); padding: 5px 0 5px 20px; }
-.tdiv.work { border-left: 3px dashed var(--accent); }
-.tdiv-txt { font-size: .7rem; color: var(--text3); }
-.tdiv.work .tdiv-txt { color: var(--accent-l); }
+/* Timeline */
+.trow{display:flex;align-items:center;gap:14px;padding:12px 0;border-left:3px solid var(--border);padding-left:16px;margin-left:14px}
+.trow.highlight{border-left-color:var(--green)}
+.trow.official{border-left-color:var(--accent)}
+.trow-icon{font-size:1.4rem;width:28px;text-align:center;flex-shrink:0}
+.trow-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.trow-time{font-size:1.8rem;font-weight:800;color:var(--text);line-height:1.1;font-family:ui-monospace,'Segoe UI Mono',monospace}
+.trow.highlight .trow-time{font-size:2.3rem;color:var(--green-l)}
+.trow.official .trow-time{color:var(--accent-l)}
+.trow-sub{font-size:.68rem;color:var(--text3);margin-top:3px}
+.tdiv{margin-left:28px;border-left:3px solid var(--border);padding:5px 0 5px 20px}
+.tdiv.work{border-left:3px dashed var(--accent)}
+.tdiv-txt{font-size:.7rem;color:var(--text3)}
+.tdiv.work .tdiv-txt{color:var(--accent-l)}
 
-/* ── STATS ───────────────────────────────────────────────── */
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 16px 18px; }
-.stat { background: var(--surface3); border-radius: var(--r); padding: 10px 12px; border-left: 3px solid var(--border); }
-.stat-lbl { font-size: .62rem; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
-.stat-val { font-size: .9rem; font-weight: 700; }
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 16px 18px}
+.stat{background:var(--surface3);border-radius:var(--r);padding:10px 12px;border-left:3px solid var(--border)}
+.stat-lbl{font-size:.62rem;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.stat-val{font-size:.9rem;font-weight:700}
 
-/* ── RESULT BOX ──────────────────────────────────────────── */
-.result-box {
-  background: var(--surface); border: 1px solid var(--green);
-  border-radius: var(--r-lg); overflow: hidden; margin-top: 4px;
-  box-shadow: 0 0 20px rgba(16,185,129,.1);
-}
-.result-head {
-  background: rgba(16,185,129,.12); border-bottom: 1px solid rgba(16,185,129,.3);
-  padding: 13px 18px; color: var(--green-l);
-  font-weight: 800; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
-}
+.result-box{background:var(--surface);border:1px solid var(--green);border-radius:var(--r-lg);overflow:hidden;margin-top:4px;box-shadow:0 0 20px rgba(16,185,129,.1)}
+.result-head{background:rgba(16,185,129,.12);border-bottom:1px solid rgba(16,185,129,.3);padding:13px 18px;color:var(--green-l);font-weight:800;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
 
-/* ── WH HINT ─────────────────────────────────────────────── */
-#wh-hint {
-  margin-top: 10px; font-size: .73rem; color: var(--accent-l);
-  line-height: 1.6; background: rgba(37,99,235,.08);
-  border-radius: var(--r); padding: 9px 12px;
-  border: 1px solid rgba(37,99,235,.2);
-}
-
-.footer { text-align: center; margin-top: 30px; font-size: .62rem; color: var(--text3); line-height: 2.2; }
-.footer strong { color: var(--accent-l); }
-
-#wh-opciones { display: none; }
-#ret-section  { display: none; }
+#wh-hint{margin-top:10px;font-size:.73rem;color:var(--accent-l);line-height:1.6;background:rgba(37,99,235,.08);border-radius:var(--r);padding:9px 12px;border:1px solid rgba(37,99,235,.2)}
+.footer{text-align:center;margin-top:30px;font-size:.62rem;color:var(--text3);line-height:2.2}
+.footer strong{color:var(--accent-l)}
+#wh-opciones{display:none}
 </style>
 </head>
 <body>
@@ -201,7 +121,7 @@ input[type=time]:focus { border-color: var(--accent); outline: none; }
     <div class="header-title">Jornada Obra</div>
     <div class="header-sub">Control de tiempos · Obra &amp; Desplazamiento</div>
   </div>
-  <div id="header-badge">8h &nbsp;·&nbsp; Lun–Jue</div>
+  <div id="header-badge">8h · Lun–Jue</div>
 </div>
 
 <div id="wrap">
@@ -226,17 +146,11 @@ input[type=time]:focus { border-color: var(--accent); outline: none; }
     <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
       <label class="check-row" id="lunch-row">
         <input type="checkbox" id="chk-lunch" style="accent-color:var(--green)">
-        <div class="check-text">
-          Parada para comer
-          <span class="sub">1h de comida — no computa en jornada</span>
-        </div>
+        <div class="check-text">Parada para comer<span class="sub">1h de comida — no computa en jornada</span></div>
       </label>
       <label class="check-row" id="wh-row">
         <input type="checkbox" id="chk-wh">
-        <div class="check-text">
-          Dia con almacen
-          <span class="sub">30 min personales en total</span>
-        </div>
+        <div class="check-text">Dia con almacen<span class="sub">empiezas / terminas en el almacén</span></div>
       </label>
       <div id="wh-opciones" style="background:var(--surface3);border-radius:var(--r);padding:13px 14px;border:1px solid var(--border)">
         <span class="lbl">Cuando es el almacen?</span>
@@ -249,54 +163,75 @@ input[type=time]:focus { border-color: var(--accent); outline: none; }
     </div>
   </div>
 
-  <!-- LLEGADA -->
+  <!-- UBICACIONES -->
   <div class="card">
-    <div class="card-head" id="llegada-head">🕐 Llegada a obra</div>
+    <div class="card-head">📍 Ubicaciones guardadas</div>
+    <div class="pad" style="display:flex;flex-direction:column;gap:16px">
+      <div>
+        <span class="lbl">🏢 Base de la empresa</span>
+        <div class="loc-row">
+          <input type="text" id="in-base" placeholder="lat, lon  ·  o pega enlace de Maps">
+          <button class="loc-gps" id="gps-base" title="Usar mi ubicación">📍</button>
+        </div>
+        <div class="loc-status" id="st-base"></div>
+      </div>
+      <div>
+        <span class="lbl">🏠 Tu casa</span>
+        <div class="loc-row">
+          <input type="text" id="in-casa" placeholder="lat, lon  ·  o pega enlace de Maps">
+          <button class="loc-gps" id="gps-casa" title="Usar mi ubicación">📍</button>
+        </div>
+        <div class="loc-status" id="st-casa"></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--text3);line-height:1.5">Ponte en el sitio y pulsa 📍 para guardarlo. Se quedan guardadas en este móvil.</div>
+    </div>
+  </div>
+
+  <!-- OBRA HOY -->
+  <div class="card">
+    <div class="card-head" id="obra-head">🏗️ Obra de hoy</div>
     <div class="pad">
       <span class="lbl" id="llegada-lbl">Hora de llegada a obra</span>
       <input type="time" id="arrival" value="08:00">
+      <span class="lbl" style="margin-top:16px">Ubicación de la obra</span>
+      <div class="loc-row">
+        <input type="text" id="in-obra" placeholder="lat, lon  ·  o 📍 al llegar">
+        <button class="loc-gps" id="gps-obra" title="Estoy en la obra">📍</button>
+      </div>
+      <div class="loc-status" id="st-obra"></div>
     </div>
   </div>
 
   <!-- VIAJE -->
   <div class="card">
-    <div class="card-head">🚗 Viaje</div>
-    <div style="padding:16px;display:flex;flex-direction:column;gap:18px">
+    <div class="card-head">🚗 Desplazamiento · a 90 km/h máx.</div>
+    <div class="pad" style="display:flex;flex-direction:column;gap:12px">
+      <div class="trip-row">
+        <span class="tr-lbl">🏢 ↔ 🏗️ Empresa–Obra</span>
+        <span class="tr-val" id="trip-work">— · 60 min</span>
+      </div>
       <div>
-        <span class="lbl">Tiempo de viaje — IDA</span>
+        <span class="lbl">Minutos empresa↔obra (ajústalo si hace falta)</span>
         <div class="stepper">
-          <button class="stepper-btn" id="btn-out-minus">−</button>
+          <button class="stepper-btn" id="btn-minus">−</button>
           <div class="stepper-sep"></div>
-          <div class="stepper-val" id="val-out">60 min</div>
+          <div class="stepper-val" id="val-work">60 min</div>
           <div class="stepper-sep"></div>
-          <button class="stepper-btn" id="btn-out-plus">+</button>
-        </div>
-        <div class="stepper-hint">
-          <span class="tu" id="mini-pout">Tu pones: 30 min</span>
-          <span class="emp" id="mini-cout">Empresa: 30 min</span>
+          <button class="stepper-btn" id="btn-plus">+</button>
         </div>
       </div>
-
-      <label class="check-row" id="same-row">
-        <input type="checkbox" id="chk-same" checked>
-        <div class="check-text">Mismo tiempo en el regreso</div>
-      </label>
-
-      <div id="ret-section">
-        <span class="lbl">Tiempo de viaje — VUELTA</span>
-        <div class="stepper">
-          <button class="stepper-btn" id="btn-ret-minus">−</button>
-          <div class="stepper-sep"></div>
-          <div class="stepper-val" id="val-ret">60 min</div>
-          <div class="stepper-sep"></div>
-          <button class="stepper-btn" id="btn-ret-plus">+</button>
-        </div>
-        <div class="stepper-hint">
-          <span class="tu" id="mini-pret">Tu pones: 30 min</span>
-          <span class="emp" id="mini-cret">Empresa: 30 min</span>
-        </div>
+      <div class="trip-row">
+        <span class="tr-lbl">🏗️ ➜ 🏠 Obra–Casa</span>
+        <span class="tr-val home" id="trip-home">— · — min</span>
       </div>
     </div>
+  </div>
+
+  <!-- NAVEGADOR -->
+  <div class="nav-btns">
+    <button class="nav-btn obra" id="nav-obra"><span class="ne">🏗️</span>Ir a la obra</button>
+    <button class="nav-btn casa" id="nav-casa"><span class="ne">🏠</span>Ir a casa</button>
+    <button class="nav-btn base" id="nav-base"><span class="ne">🏢</span>Ir a empresa</button>
   </div>
 
   <!-- RESULTADO -->
@@ -307,135 +242,192 @@ input[type=time]:focus { border-color: var(--accent); outline: none; }
   </div>
 
   <div class="footer">
-    Lun–Jue: 8h &nbsp;·&nbsp; Viernes: 7h &nbsp;·&nbsp; Porcion personal: 30 min/tramo<br>
-    Creado por <strong>Braulio</strong> · v2.0
+    Lun–Jue: 8h &nbsp;·&nbsp; Viernes: 7h &nbsp;·&nbsp; La jornada cuenta desde obra<br>
+    Creado por <strong>Braulio</strong> · v3.0
   </div>
 
 </div>
 
 <script>
-var STEP = 5, MIN_T = 15, MAX_T = 180;
+var STEP=5, MIN_T=5, MAX_T=240, SPEED=90, ROAD=1.3;
 
 var state = {
-  diaIdx: diaHoy(), arrival: "08:00",
-  tOut: 60, tRet: 60, same: true,
-  lunch: false, wh: false, whWhen: "inicio"
+  diaIdx: diaHoy(), arrival:"08:00",
+  lunch:false, wh:false, whWhen:"inicio",
+  base:null, casa:null, obra:null,
+  workManual:null   // si el usuario ajusta a mano los minutos empresa↔obra
 };
 
-function diaHoy() {
-  var d = new Date().getDay();
-  return (d >= 1 && d <= 5) ? d - 1 : 0;
+// ── localStorage ──────────────────────────────────────────
+function load(){
+  try{
+    var b=localStorage.getItem("jornada_base"); if(b) state.base=JSON.parse(b);
+    var c=localStorage.getItem("jornada_casa"); if(c) state.casa=JSON.parse(c);
+  }catch(e){}
 }
-function toMins(t) { var p = t.split(":"); return +p[0]*60 + +p[1]; }
-function toTime(m) { var t=((m%1440)+1440)%1440; return pad(Math.floor(t/60))+":"+pad(t%60); }
-function pad(n) { return n<10?"0"+n:""+n; }
-function fmt(m) {
-  var h=Math.floor(Math.abs(m)/60), mn=Math.abs(m)%60;
-  if(h===0) return mn+" min";
-  if(mn===0) return h+"h";
-  return h+"h "+mn+"min";
+function save(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+// ── Utils ─────────────────────────────────────────────────
+function diaHoy(){ var d=new Date().getDay(); return (d>=1&&d<=5)?d-1:0; }
+function toMins(t){ var p=t.split(":"); return +p[0]*60 + +p[1]; }
+function toTime(m){ var t=((m%1440)+1440)%1440; return pad(Math.floor(t/60))+":"+pad(t%60); }
+function pad(n){ return n<10?"0"+n:""+n; }
+function fmt(m){ var h=Math.floor(Math.abs(m)/60),mn=Math.abs(m)%60; if(h===0)return mn+" min"; if(mn===0)return h+"h"; return h+"h "+mn+"min"; }
+
+function haversine(a,b){
+  var R=6371, dLat=(b.lat-a.lat)*Math.PI/180, dLon=(b.lon-a.lon)*Math.PI/180;
+  var la1=a.lat*Math.PI/180, la2=b.lat*Math.PI/180;
+  var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.sin(dLon/2)*Math.sin(dLon/2)*Math.cos(la1)*Math.cos(la2);
+  return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+}
+function roadKm(a,b){ return a&&b ? haversine(a,b)*ROAD : null; }
+function kmToMin(km){ return Math.max(MIN_T, Math.round((km/SPEED*60)/5)*5); }
+
+// parse "lat, lon" o enlace de Google Maps
+function parseLoc(txt){
+  if(!txt) return null;
+  var at=txt.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(at) return {lat:+at[1], lon:+at[2]};
+  var m=txt.match(/(-?\d{1,3}\.\d+)[ ,]+(-?\d{1,3}\.\d+)/);
+  if(m) return {lat:+m[1], lon:+m[2]};
+  return null;
 }
 
-function calculate() {
-  var s=state, arr=toMins(s.arrival), out=s.tOut, ret=s.same?out:s.tRet;
+// ── Trips ─────────────────────────────────────────────────
+function calcTrips(){
+  var kmW=roadKm(state.base,state.obra), kmH=roadKm(state.obra,state.casa);
+  var tW = state.workManual!=null ? state.workManual : (kmW!=null ? kmToMin(kmW) : 60);
+  var tH = kmH!=null ? kmToMin(kmH) : tW;
+  return {kmW:kmW, tW:tW, kmH:kmH, tH:tH};
+}
+
+// ── Cálculo de jornada (Modelo: cuenta desde obra) ────────
+function calculate(){
+  var s=state, arr=toMins(s.arrival);
   var WD=(s.diaIdx===4?7:8)*60, lunchM=s.lunch?60:0;
-  var pOut,pRet,cOut,cRet;
-  if(s.wh && s.whWhen==="inicio")      { pOut=0;  pRet=30; cOut=0; cRet=Math.max(0,ret-30); }
-  else if(s.wh && s.whWhen==="final")  { pOut=30; pRet=0;  cOut=Math.max(0,out-30); cRet=ret; }
-  else { pOut=30; pRet=30; cOut=Math.max(0,out-30); cRet=Math.max(0,ret-30); }
-  var wStart=arr-cOut, wEnd=wStart+WD+lunchM, leave=wEnd-cRet, home=leave+ret;
-  return {wStart:toTime(wStart),arr:toTime(arr),leave:toTime(leave),
-          home:toTime(home),wEnd:toTime(wEnd),
-          cOut:cOut,cRet:cRet,pOut:pOut,pRet:pRet,retMins:ret};
+  var t=calcTrips();
+  var finBase = arr + WD + lunchM;   // FIN DE JORNADA oficial: llegas a la base
+  var leave   = finBase - t.tW;      // sales de obra (la vuelta cuenta como jornada)
+  var homeReal= leave + t.tH;        // llegada real a tu casa (informativa)
+  var onSite  = leave - arr;
+  return {
+    arr:toTime(arr), leave:toTime(leave), finBase:toTime(finBase), homeReal:toTime(homeReal),
+    onSite:onSite, cRet:Math.max(0,t.tW-30), pRet:30, owe:30,
+    tW:t.tW, tH:t.tH, kmW:t.kmW, kmH:t.kmH
+  };
 }
 
-function render() {
+// ── Render ────────────────────────────────────────────────
+function render(){
   var s=state, isVie=s.diaIdx===4, whStart=s.wh&&s.whWhen==="inicio", r=calculate();
 
-  // Badge header
   var badge=document.getElementById("header-badge");
-  badge.textContent = isVie ? "7h · Viernes" : "8h · Lun–Jue";
-  badge.className = isVie ? "vie" : "";
+  badge.textContent = isVie?"7h · Viernes":"8h · Lun–Jue";
+  badge.className = isVie?"vie":"";
 
-  // Dias
   document.querySelectorAll(".dia-btn").forEach(function(b){
     var i=+b.getAttribute("data-i");
     b.className="dia-btn"+(i===s.diaIdx?(i===4?" active-vie":" active-normal"):"");
   });
 
-  // Lunch row
   var lr=document.getElementById("lunch-row");
-  lr.style.background = s.lunch ? "rgba(16,185,129,.08)" : "var(--surface2)";
-  lr.style.borderColor = s.lunch ? "rgba(16,185,129,.4)" : "var(--border)";
-
-  // WH row
+  lr.style.background=s.lunch?"rgba(16,185,129,.08)":"var(--surface2)";
+  lr.style.borderColor=s.lunch?"rgba(16,185,129,.4)":"var(--border)";
   var wr=document.getElementById("wh-row");
-  wr.style.background = s.wh ? "rgba(37,99,235,.08)" : "var(--surface2)";
-  wr.style.borderColor = s.wh ? "rgba(37,99,235,.4)" : "var(--border)";
+  wr.style.background=s.wh?"rgba(37,99,235,.08)":"var(--surface2)";
+  wr.style.borderColor=s.wh?"rgba(37,99,235,.4)":"var(--border)";
 
-  // WH opciones
-  document.getElementById("wh-opciones").style.display = s.wh ? "block" : "none";
+  document.getElementById("wh-opciones").style.display=s.wh?"block":"none";
   document.querySelectorAll(".wh-btn").forEach(function(b){
     b.className="wh-btn"+(b.getAttribute("data-w")===s.whWhen?" active":"");
   });
   document.getElementById("wh-hint").textContent = whStart
-    ? "Introduces la hora de llegada al almacen. La jornada arranca ahi. Los 30 min personales van al regreso."
-    : "Los 30 min personales van a la ida. El regreso es todo empresa.";
+    ? "Pon la hora de llegada al almacén: la jornada arranca ahí. La empresa te abona los 30 min de la mañana."
+    : "Terminas en el almacén; la vuelta desde el almacén cuenta como jornada.";
 
-  // Llegada labels
-  document.getElementById("llegada-head").innerHTML = "🕐 " + (whStart ? "Llegada al almacen" : "Llegada a obra");
-  document.getElementById("llegada-lbl").textContent = whStart ? "Hora de llegada al almacen" : "Hora de llegada a obra";
+  document.getElementById("obra-head").innerHTML = "🏗️ " + (whStart?"Almacén de hoy":"Obra de hoy");
+  document.getElementById("llegada-lbl").textContent = whStart?"Hora de llegada al almacén":"Hora de llegada a obra";
 
-  // Same row
-  var sr=document.getElementById("same-row");
-  sr.style.borderColor = s.same ? "rgba(37,99,235,.4)" : "var(--border)";
-  sr.style.background  = s.same ? "rgba(37,99,235,.06)" : "var(--surface2)";
-  document.getElementById("ret-section").style.display = s.same ? "none" : "block";
+  // Ubicaciones status
+  locStatus("base", s.base);
+  locStatus("casa", s.casa);
+  locStatus("obra", s.obra);
 
-  // Steppers
-  document.getElementById("val-out").textContent = s.tOut+" min";
-  document.getElementById("val-ret").textContent = s.tRet+" min";
-  document.getElementById("mini-pout").textContent = "Tu pones: "+r.pOut+" min";
-  document.getElementById("mini-cout").textContent = "Empresa: "+r.cOut+" min";
-  document.getElementById("mini-pret").textContent = "Tu pones: "+r.pRet+" min";
-  document.getElementById("mini-cret").textContent = "Empresa: "+r.cRet+" min";
+  // Viaje
+  document.getElementById("val-work").textContent = r.tW+" min";
+  document.getElementById("trip-work").textContent = (r.kmW!=null?(Math.round(r.kmW)+" km · "):"") + r.tW+" min";
+  document.getElementById("trip-home").textContent = (r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ") + r.tH+" min";
 
   // Timeline
-  var subLunch = s.lunch ? " (incl. 1h comida)" : "";
-  var iconObra = whStart ? "🏭" : "🏗️";
-  var labelArr = whStart ? "Llegas al almacen" : "Llegas a obra";
+  var subLunch = s.lunch?" (incl. 1h comida)":"";
+  var startIcon = whStart?"🏭":"🏗️";
+  var startLbl  = whStart?"Llegas al almacén":"Llegas a obra";
+  var leaveLbl  = (s.wh&&s.whWhen==="final")?"Sales del almacén":"Sales de obra";
   document.getElementById("timeline").innerHTML =
-    trow(iconObra, labelArr, r.arr, "Jornada computa desde las "+r.wStart, false) +
-    tdiv("Horas de trabajo", true) +
-    trow("🚪", "Sales de obra", r.leave, "Fin jornada: "+r.wEnd+subLunch, true) +
-    tdiv(r.retMins+" min vuelta — Empresa: "+r.cRet+"min"+(r.pRet>0?" / Tu: "+r.pRet+"min":""), false) +
-    trow("🏠", "Llegas a casa", r.home, "", false);
+    trow(startIcon, startLbl, r.arr, "Empieza a contar la jornada", "") +
+    tdiv("En el tajo: "+fmt(r.onSite)+subLunch, true) +
+    trow("🚪", leaveLbl, r.leave, "La vuelta ("+r.tW+" min) cuenta como jornada", "highlight") +
+    tdiv("Vuelta a la base "+r.tW+" min — Empresa: "+r.cRet+"min / Tú: "+r.pRet+"min", false) +
+    trow("🏁", "Fin de jornada (base)", r.finBase, "Hora oficial de fin de trabajo", "official") +
+    trow("🏠", "Llegas a tu casa", r.homeReal, "Informativo · NO es el fin de jornada", "");
 
   // Stats
   document.getElementById("stats").innerHTML =
     stat("Jornada", isVie?"7h (viernes)":"8h", isVie?"var(--orange)":"var(--accent-l)") +
     stat("Comida", s.lunch?"1h (no computa)":"Sin parada", s.lunch?"var(--danger)":"var(--text3)") +
-    stat("Empresa paga ida",    fmt(r.cOut), "var(--green)") +
-    stat("Empresa paga vuelta", fmt(r.cRet), "var(--green)") +
-    stat("Tu pones ida",    r.pOut>0?fmt(r.pOut):"—", r.pOut>0?"var(--danger)":"var(--text3)") +
-    stat("Tu pones vuelta", r.pRet>0?fmt(r.pRet):"—", r.pRet>0?"var(--danger)":"var(--text3)");
+    stat("Sales de obra", r.leave, "var(--green-l)") +
+    stat("Fin jornada (base)", r.finBase, "var(--accent-l)") +
+    stat("Llegas a tu casa", r.homeReal, "var(--green-l)") +
+    stat("Empresa te abona (mañana)", fmt(r.owe), "var(--accent-l)");
 }
 
-function trow(icon,label,time,sub,highlight){
-  return '<div class="trow'+(highlight?" highlight":"")+'">'+
+function locStatus(which, loc){
+  var el=document.getElementById("st-"+which);
+  var inp=document.getElementById("in-"+which);
+  if(loc){
+    el.textContent="✓ Guardada: "+loc.lat.toFixed(5)+", "+loc.lon.toFixed(5);
+    el.className="loc-status ok";
+    if(document.activeElement!==inp) inp.value=loc.lat.toFixed(6)+", "+loc.lon.toFixed(6);
+  } else {
+    el.textContent=""; el.className="loc-status";
+  }
+}
+
+function trow(icon,label,time,sub,cls){
+  return '<div class="trow'+(cls?" "+cls:"")+'">'+
     '<span class="trow-icon">'+icon+'</span>'+
     '<div><div class="trow-label">'+label+'</div>'+
     '<div class="trow-time">'+time+'</div>'+
-    (sub?'<div class="trow-sub">'+sub+'</div>':'')+
-    '</div></div>';
+    (sub?'<div class="trow-sub">'+sub+'</div>':'')+'</div></div>';
 }
-function tdiv(label,isWork){
-  return '<div class="tdiv'+(isWork?" work":"")+'"><div class="tdiv-txt">'+label+'</div></div>';
-}
+function tdiv(label,isWork){ return '<div class="tdiv'+(isWork?" work":"")+'"><div class="tdiv-txt">'+label+'</div></div>'; }
 function stat(label,value,color){
-  return '<div class="stat" style="border-left-color:'+color+'">'+
-    '<div class="stat-lbl">'+label+'</div>'+
+  return '<div class="stat" style="border-left-color:'+color+'"><div class="stat-lbl">'+label+'</div>'+
     '<div class="stat-val" style="color:'+color+'">'+value+'</div></div>';
+}
+
+// ── Ubicaciones: capturar / escribir ──────────────────────
+function setLoc(which, loc){
+  state[which]=loc;
+  if(which==="base") save("jornada_base",loc);
+  if(which==="casa") save("jornada_casa",loc);
+  if(which==="obra" || which==="base") state.workManual=null; // recalcula minutos
+  render();
+}
+function capturar(which){
+  var el=document.getElementById("st-"+which);
+  if(!navigator.geolocation){ el.textContent="Este móvil no tiene GPS disponible"; el.className="loc-status err"; return; }
+  el.textContent="Obteniendo ubicación…"; el.className="loc-status";
+  navigator.geolocation.getCurrentPosition(function(p){
+    setLoc(which, {lat:p.coords.latitude, lon:p.coords.longitude});
+  }, function(err){
+    el.textContent="No se pudo ("+err.message+"). Escribe lat, lon a mano.";
+    el.className="loc-status err";
+  }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+}
+function navTo(loc, nombre){
+  if(!loc){ alert("Primero guarda la ubicación de "+nombre+"."); return; }
+  window.open("https://www.google.com/maps/dir/?api=1&destination="+loc.lat+","+loc.lon+"&travelmode=driving","_blank");
 }
 
 // ── Eventos ───────────────────────────────────────────────
@@ -444,18 +436,33 @@ document.querySelectorAll(".dia-btn").forEach(function(b){
 });
 document.getElementById("chk-lunch").addEventListener("change",function(){ state.lunch=this.checked; render(); });
 document.getElementById("chk-wh").addEventListener("change",function(){ state.wh=this.checked; render(); });
-document.getElementById("chk-same").addEventListener("change",function(){ state.same=this.checked; render(); });
 document.querySelectorAll(".wh-btn").forEach(function(b){
   b.addEventListener("click",function(){ state.whWhen=this.getAttribute("data-w"); render(); });
 });
 document.getElementById("arrival").addEventListener("change",function(){ state.arrival=this.value; render(); });
 
-function clamp(v){ return Math.min(MAX_T,Math.max(MIN_T,v)); }
-document.getElementById("btn-out-minus").addEventListener("click",function(){ state.tOut=clamp(state.tOut-STEP); render(); });
-document.getElementById("btn-out-plus").addEventListener("click",function(){ state.tOut=clamp(state.tOut+STEP); render(); });
-document.getElementById("btn-ret-minus").addEventListener("click",function(){ state.tRet=clamp(state.tRet-STEP); render(); });
-document.getElementById("btn-ret-plus").addEventListener("click",function(){ state.tRet=clamp(state.tRet+STEP); render(); });
+document.getElementById("gps-base").addEventListener("click",function(){ capturar("base"); });
+document.getElementById("gps-casa").addEventListener("click",function(){ capturar("casa"); });
+document.getElementById("gps-obra").addEventListener("click",function(){ capturar("obra"); });
 
+["base","casa","obra"].forEach(function(w){
+  document.getElementById("in-"+w).addEventListener("change",function(){
+    var loc=parseLoc(this.value);
+    if(loc) setLoc(w,loc);
+    else { var el=document.getElementById("st-"+w); el.textContent="No reconozco esas coordenadas"; el.className="loc-status err"; }
+  });
+});
+
+function clamp(v){ return Math.min(MAX_T,Math.max(MIN_T,v)); }
+document.getElementById("btn-minus").addEventListener("click",function(){ state.workManual=clamp(calcTrips().tW-STEP); render(); });
+document.getElementById("btn-plus").addEventListener("click",function(){ state.workManual=clamp(calcTrips().tW+STEP); render(); });
+
+document.getElementById("nav-obra").addEventListener("click",function(){ navTo(state.obra,"la obra"); });
+document.getElementById("nav-casa").addEventListener("click",function(){ navTo(state.casa,"tu casa"); });
+document.getElementById("nav-base").addEventListener("click",function(){ navTo(state.base,"la empresa"); });
+
+// ── Init ──────────────────────────────────────────────────
+load();
 render();
 
 if('serviceWorker' in navigator){
