@@ -333,6 +333,7 @@ function load(){
     var b=localStorage.getItem("jornada_base"); if(b) state.base=JSON.parse(b);
     var c=localStorage.getItem("jornada_casa"); if(c) state.casa=JSON.parse(c);
     var s=localStorage.getItem("jornada_speed"); if(s) state.speed=+s;
+    var j=localStorage.getItem("jornada_jstart"); if(j) state.jstart=j;
   }catch(e){}
 }
 function save(key,val){ try{ localStorage.setItem(key, typeof val==="object"?JSON.stringify(val):val); }catch(e){} }
@@ -562,7 +563,7 @@ document.getElementById("chk-wh").addEventListener("change",function(){ state.wh
 document.querySelectorAll(".wh-btn").forEach(function(b){
   b.addEventListener("click",function(){ state.whWhen=this.getAttribute("data-w"); render(); });
 });
-document.getElementById("jstart").addEventListener("change",function(){ state.jstart=this.value; render(); });
+document.getElementById("jstart").addEventListener("change",function(){ state.jstart=this.value; save("jornada_jstart",this.value); render(); });
 document.getElementById("arrival").addEventListener("change",function(){ state.arrival=this.value; render(); });
 
 document.getElementById("gps-base").addEventListener("click",function(){ capturar("base"); });
@@ -613,6 +614,7 @@ document.getElementById("map-gps").addEventListener("click",function(){
 // ── Init ──────────────────────────────────────────────────
 load();
 document.getElementById("in-speed").value=state.speed;
+document.getElementById("jstart").value=state.jstart;
 render();
 updateRoutes();   // si ya hay casa/base guardadas, intenta ruta real al arrancar
 
