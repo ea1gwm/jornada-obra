@@ -55,6 +55,7 @@ input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--acc
 
 input[type=time]{color-scheme:dark;width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--accent-l);font-size:2.5rem;font-family:ui-monospace,'Segoe UI Mono',monospace;font-weight:700;padding:12px 16px;text-align:center;letter-spacing:.05em;transition:border-color .2s}
 input[type=time]:focus{border-color:var(--accent);outline:none}
+input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
 
 .loc-row{display:flex;gap:8px;align-items:stretch}
 .loc-row input[type=text]{flex:1;min-width:0;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:ui-monospace,'Segoe UI Mono',monospace;font-size:.85rem;padding:11px 12px;outline:none;transition:border-color .2s}
@@ -191,8 +192,17 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
   <div class="card">
     <div class="card-head" id="obra-head">🏗️ Obra de hoy</div>
     <div class="pad">
-      <span class="lbl" id="llegada-lbl">Hora de llegada a obra</span>
-      <input type="time" id="arrival" value="08:00">
+      <div style="display:flex;gap:10px">
+        <div style="flex:1">
+          <span class="lbl">⏱️ Inicio jornada</span>
+          <input type="time" id="jstart" value="08:00" class="time-sm">
+        </div>
+        <div style="flex:1">
+          <span class="lbl" id="llegada-lbl">🏗️ Llegada a obra</span>
+          <input type="time" id="arrival" value="08:00" class="time-sm">
+        </div>
+      </div>
+      <div style="font-size:.68rem;color:var(--text3);line-height:1.5;margin-top:8px">08:00 normal · 07:00 en verano. Si llegas más tarde del inicio, esos minutos los pone la empresa.</div>
       <span class="lbl" style="margin-top:16px">Lugar de trabajo (destino)</span>
       <div class="loc-row">
         <input type="text" id="in-obra" placeholder="lat, lon">
@@ -310,7 +320,7 @@ input[type=time]:focus{border-color:var(--accent);outline:none}
 var STEP=5, MIN_T=5, MAX_T=300, ROAD=1.3;
 
 var state = {
-  diaIdx: diaHoy(), arrival:"08:00",
+  diaIdx: diaHoy(), jstart:"08:00", arrival:"08:00",
   lunch:false, wh:false, whWhen:"inicio",
   base:null, casa:null, obra:null,
   speed:90, workManual:null,
@@ -375,19 +385,28 @@ function updateRoutes(){
   fetchRoute(state.obra, state.casa, function(km){ if(km!=null){ state.osrm.home=km; render(); } });
 }
 
-// ── Cálculo (la jornada cuenta desde la llegada a obra) ───
+// ── Cálculo ───────────────────────────────────────────────
+// Inicio de jornada = hora oficial (08:00, 07:00 verano). Llegada a obra puede
+// ser igual o posterior. Pones 30 min por tramo; el resto del viaje, la empresa.
+// Si llegas justo al inicio, la empresa te abona 30 min (no llegaste a meter
+// viaje dentro de la jornada). Si llegas más tarde, esos minutos ya cuentan.
 function calculate(){
-  var s=state, arr=toMins(s.arrival);
+  var s=state, jStart=toMins(s.jstart), arr=toMins(s.arrival);
   var WD=(s.diaIdx===4?7:8)*60, lunchM=s.lunch?60:0;
-  var t=calcTrips();
-  var finBase = arr + WD + lunchM;   // fin de jornada oficial (vuelta a la base)
-  var leave   = finBase - t.tW;      // sales de obra
-  var homeReal= leave + t.tH;        // llegada real a tu casa (informativa)
-  var onSite  = leave - arr;
+  var t=calcTrips(), tW=t.tW, tH=t.tH;
+  var cTravel=Math.max(0,tW-30);               // parte de la empresa en cada tramo
+  var jEnd=jStart+WD+lunchM;                   // fin de jornada PAGADA (reloj)
+  var late=Math.max(0,arr-jStart);             // cuánto llegas después del inicio
+  var owed=Math.max(0,30-late);                // lo que te abona la empresa (mañana)
+  var leave=jEnd-cTravel-owed;                 // sales de obra
+  var baseArr=leave+tW;                        // llegas a la base
+  var homeReal=leave+tH;                        // llegas a tu casa (informativo)
+  var onSite=leave-arr;
   return {
-    arr:toTime(arr), leave:toTime(leave), finBase:toTime(finBase), homeReal:toTime(homeReal),
-    onSite:onSite, cRet:Math.max(0,t.tW-30), pRet:30, owe:30,
-    tW:t.tW, tH:t.tH, kmW:t.kmW, kmH:t.kmH, realW:t.realW, realH:t.realH
+    jStart:toTime(jStart), arr:toTime(arr), leave:toTime(leave), jEnd:toTime(jEnd),
+    baseArr:toTime(baseArr), homeReal:toTime(homeReal), onSite:onSite,
+    cRet:cTravel, pRet:Math.min(30,tW), owed:owed,
+    tW:tW, tH:tH, kmW:t.kmW, kmH:t.kmH, realW:t.realW, realH:t.realH
   };
 }
 
@@ -419,7 +438,7 @@ function render(){
     : "Terminas en el almacén; la vuelta desde el almacén cuenta como jornada.";
 
   document.getElementById("obra-head").innerHTML="🏗️ "+(whStart?"Almacén de hoy":"Obra de hoy");
-  document.getElementById("llegada-lbl").textContent=whStart?"Hora de llegada al almacén":"Hora de llegada a obra";
+  document.getElementById("llegada-lbl").textContent=whStart?"🏭 Llegada almacén":"🏗️ Llegada a obra";
   document.getElementById("viaje-head").textContent="🚗 Desplazamiento · "+(s.speed||90)+" km/h";
 
   locStatus("base",s.base); locStatus("casa",s.casa); locStatus("obra",s.obra);
@@ -432,20 +451,19 @@ function render(){
   var startIcon=whStart?"🏭":"🏗️", startLbl=whStart?"Llegas al almacén":"Llegas a obra";
   var leaveLbl=(s.wh&&s.whWhen==="final")?"Sales del almacén":"Sales de obra";
   document.getElementById("timeline").innerHTML =
-    trow(startIcon,startLbl,r.arr,"Empieza a contar la jornada","") +
+    trow(startIcon,startLbl,r.arr,"Jornada empezó a las "+r.jStart,"") +
     tdiv("En el tajo: "+fmt(r.onSite)+subLunch,true) +
-    trow("🚪",leaveLbl,r.leave,"La vuelta ("+r.tW+" min) cuenta como jornada","highlight") +
-    tdiv("Vuelta a la base "+r.tW+" min — Empresa: "+r.cRet+"min / Tú: "+r.pRet+"min",false) +
-    trow("🏁","Fin de jornada (base)",r.finBase,"Hora oficial de fin de trabajo","official") +
+    trow("🚪",leaveLbl,r.leave,"Vuelta "+r.tW+" min — Empresa: "+r.cRet+" / Tú: "+r.pRet+(r.owed>0?" · te abona "+r.owed+"min":""),"highlight") +
+    trow("🏁","Fin de jornada",r.jEnd,"Fin oficial · llegas a la base a las "+r.baseArr,"official") +
     trow("🏠","Llegas a tu casa",r.homeReal,"Informativo · NO es el fin de jornada","");
 
   document.getElementById("stats").innerHTML =
     stat("Jornada", isVie?"7h (viernes)":"8h", isVie?"var(--orange)":"var(--accent-l)") +
     stat("Comida", s.lunch?"1h (no computa)":"Sin parada", s.lunch?"var(--danger)":"var(--text3)") +
     stat("Sales de obra", r.leave, "var(--green-l)") +
-    stat("Fin jornada (base)", r.finBase, "var(--accent-l)") +
-    stat("Llegas a tu casa", r.homeReal, "var(--green-l)") +
-    stat("Empresa te abona", fmt(r.owe), "var(--accent-l)");
+    stat("Fin de jornada", r.jEnd, "var(--accent-l)") +
+    stat("Llegas a la base", r.baseArr, "var(--accent-l)") +
+    stat("Llegas a tu casa", r.homeReal, "var(--green-l)");
 }
 
 function locStatus(which,loc){
@@ -544,6 +562,7 @@ document.getElementById("chk-wh").addEventListener("change",function(){ state.wh
 document.querySelectorAll(".wh-btn").forEach(function(b){
   b.addEventListener("click",function(){ state.whWhen=this.getAttribute("data-w"); render(); });
 });
+document.getElementById("jstart").addEventListener("change",function(){ state.jstart=this.value; render(); });
 document.getElementById("arrival").addEventListener("change",function(){ state.arrival=this.value; render(); });
 
 document.getElementById("gps-base").addEventListener("click",function(){ capturar("base"); });
