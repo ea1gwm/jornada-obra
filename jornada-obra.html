@@ -387,26 +387,28 @@ function updateRoutes(){
 }
 
 // ── Cálculo ───────────────────────────────────────────────
-// Inicio de jornada = hora oficial (08:00, 07:00 verano). Llegada a obra puede
-// ser igual o posterior. Pones 30 min por tramo; el resto del viaje, la empresa.
-// Si llegas justo al inicio, la empresa te abona 30 min (no llegaste a meter
-// viaje dentro de la jornada). Si llegas más tarde, esos minutos ya cuentan.
+// Regla: pones 30 min de ida + 30 de vuelta = 60 min tuyos al día. El resto del
+// viaje (ida y vuelta) lo paga la empresa y cuenta como jornada. Si llegas más
+// tarde del inicio oficial, recuperas ese retraso al final (sales más tarde).
+//   tiempo tuyo no pagado = 60 + retraso
+//   vuelves a la base = (saliste de la base) + jornada + comida + tiempo tuyo
+//   sales de obra = vuelta a la base − viaje de vuelta
 function calculate(){
   var s=state, jStart=toMins(s.jstart), arr=toMins(s.arrival);
   var WD=(s.diaIdx===4?7:8)*60, lunchM=s.lunch?60:0;
   var t=calcTrips(), tW=t.tW, tH=t.tH;
-  var cTravel=Math.max(0,tW-30);               // parte de la empresa en cada tramo
-  var jEnd=jStart+WD+lunchM;                   // fin de jornada PAGADA (reloj)
-  var late=Math.max(0,arr-jStart);             // cuánto llegas después del inicio
-  var owed=Math.max(0,30-late);                // lo que te abona la empresa (mañana)
-  var leave=jEnd-cTravel-owed;                 // sales de obra
-  var baseArr=leave+tW;                        // llegas a la base
-  var homeReal=leave+tH;                        // llegas a tu casa (informativo)
+  var jEnd=jStart+WD+lunchM;                    // fin de jornada pagada (reloj)
+  var late=Math.max(0, arr-jStart);             // minutos que llegas tarde al inicio
+  var personal=60+late;                         // tu tiempo de viaje NO pagado
+  var baseDep=arr-tW;                           // saliste de la base por la mañana
+  var baseArr=baseDep+WD+lunchM+personal;       // vuelves a la base
+  var leave=baseArr-tW;                         // sales de obra
+  var homeReal=leave+tH;                         // llegas a tu casa (informativo)
   var onSite=leave-arr;
   return {
     jStart:toTime(jStart), arr:toTime(arr), leave:toTime(leave), jEnd:toTime(jEnd),
     baseArr:toTime(baseArr), homeReal:toTime(homeReal), onSite:onSite,
-    cRet:cTravel, pRet:Math.min(30,tW), owed:owed,
+    late:late, personal:personal,
     tW:tW, tH:tH, kmW:t.kmW, kmH:t.kmH, realW:t.realW, realH:t.realH
   };
 }
@@ -451,20 +453,21 @@ function render(){
   var subLunch=s.lunch?" (incl. 1h comida)":"";
   var startIcon=whStart?"🏭":"🏗️", startLbl=whStart?"Llegas al almacén":"Llegas a obra";
   var leaveLbl=(s.wh&&s.whWhen==="final")?"Sales del almacén":"Sales de obra";
+  var lateTxt = r.late>0 ? " · llegas "+r.late+" min tarde" : "";
   document.getElementById("timeline").innerHTML =
-    trow(startIcon,startLbl,r.arr,"Jornada empezó a las "+r.jStart,"") +
+    trow(startIcon,startLbl,r.arr,"Inicio jornada: "+r.jStart+lateTxt,"") +
     tdiv("En el tajo: "+fmt(r.onSite)+subLunch,true) +
-    trow("🚪",leaveLbl,r.leave,"Vuelta "+r.tW+" min — Empresa: "+r.cRet+" / Tú: "+r.pRet+(r.owed>0?" · te abona "+r.owed+"min":""),"highlight") +
-    trow("🏁","Fin de jornada",r.jEnd,"Fin oficial · llegas a la base a las "+r.baseArr,"official") +
+    trow("🚪",leaveLbl,r.leave,"Pones "+fmt(r.personal)+" tuyos de viaje en total","highlight") +
+    trow("🏁","Llegas a la base",r.baseArr,"Vuelta a la empresa · fin del trabajo","official") +
     trow("🏠","Llegas a tu casa",r.homeReal,"Informativo · NO es el fin de jornada","");
 
   document.getElementById("stats").innerHTML =
     stat("Jornada", isVie?"7h (viernes)":"8h", isVie?"var(--orange)":"var(--accent-l)") +
     stat("Comida", s.lunch?"1h (no computa)":"Sin parada", s.lunch?"var(--danger)":"var(--text3)") +
     stat("Sales de obra", r.leave, "var(--green-l)") +
-    stat("Fin de jornada", r.jEnd, "var(--accent-l)") +
     stat("Llegas a la base", r.baseArr, "var(--accent-l)") +
-    stat("Llegas a tu casa", r.homeReal, "var(--green-l)");
+    stat("Llegas a tu casa", r.homeReal, "var(--green-l)") +
+    stat("Pones tú (viaje)", fmt(r.personal), "var(--danger)");
 }
 
 function locStatus(which,loc){
