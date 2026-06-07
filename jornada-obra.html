@@ -399,7 +399,8 @@ function calculate(){
   var t=calcTrips(), tW=t.tW, tH=t.tH;
   var jEnd=jStart+WD+lunchM;                    // fin de jornada pagada (reloj)
   var late=Math.max(0, arr-jStart);             // minutos que llegas tarde al inicio
-  var personal=60+late;                         // tu tiempo de viaje NO pagado
+  // Día normal pones 60 (30+30). Día de almacén, un tramo es de la empresa: solo 30.
+  var personal=(s.wh?30:60)+late;               // tu tiempo de viaje NO pagado
   var baseDep=arr-tW;                           // saliste de la base por la mañana
   var baseArr=baseDep+WD+lunchM+personal;       // vuelves a la base
   var leave=baseArr-tW;                         // sales de obra
