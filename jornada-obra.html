@@ -250,7 +250,7 @@ input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
 
   <div class="footer">
     Lun–Jue: 8h &nbsp;·&nbsp; Viernes: 7h &nbsp;·&nbsp; La jornada cuenta desde obra<br>
-    Creado por <strong>Braulio</strong> · v10.0
+    Creado por <strong>Braulio</strong> · v12.0
   </div>
 
 </div>
@@ -294,7 +294,7 @@ input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
       <div class="pad">
         <label class="check-row" id="whint-row" style="margin-bottom:14px">
           <input type="checkbox" id="in-whint">
-          <div class="check-text">Verano: intensiva<span class="sub">sin parada para comer</span></div>
+          <div class="check-text">Horario intensivo<span class="sub">el almacén no para a comer</span></div>
         </label>
         <div style="display:flex;gap:10px">
           <div style="flex:1">
@@ -306,7 +306,7 @@ input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
           <div style="flex:1"><span class="lbl">Comida desde</span><input type="time" id="in-whfrom" value="14:00" class="time-sm"></div>
           <div style="flex:1"><span class="lbl">hasta</span><input type="time" id="in-whto" value="15:00" class="time-sm"></div>
         </div>
-        <div style="font-size:.7rem;color:var(--text3);line-height:1.5;margin-top:10px">Si en verano hacéis intensiva, marca la casilla y no se contará el cierre de comida.</div>
+        <div style="font-size:.7rem;color:var(--text3);line-height:1.5;margin-top:10px">Márcalo cuando el almacén haga jornada intensiva (verano u otros días): no se contará el cierre de comida.</div>
       </div>
     </div>
     <div style="font-size:.66rem;color:var(--text3);text-align:center;line-height:1.8;margin-top:6px">
@@ -408,29 +408,25 @@ function updateRoutes(){
 }
 
 // ── Cálculo ───────────────────────────────────────────────
-// Regla: pones 30 min de ida + 30 de vuelta = 60 min tuyos al día. El resto del
-// viaje (ida y vuelta) lo paga la empresa y cuenta como jornada. Si llegas más
-// tarde del inicio oficial, recuperas ese retraso al final (sales más tarde).
-//   tiempo tuyo no pagado = 60 + retraso
-//   vuelves a la base = (saliste de la base) + jornada + comida + tiempo tuyo
-//   sales de obra = vuelta a la base − viaje de vuelta
+// Regla: absorbes hasta 30 min de viaje por tramo (radio de 1h = 30 ida + 30 vuelta).
+// Lo que pasa de 30 por tramo lo paga la empresa y cuenta como jornada (sales antes).
+// Dentro del radio (≤30/tramo) haces las 8h enteras en la obra: sales a inicio+8h.
+// Día de almacén: un tramo entero lo pone la empresa (solo pones 30 ese día).
 function calculate(){
   var s=state, jStart=toMins(s.jstart), arr=toMins(s.arrival);
   var WD=(s.diaIdx===4?7:8)*60, lunchM=s.lunch?60:0;
   var t=calcTrips(), tW=t.tW, tH=t.tH;
-  var jEnd=jStart+WD+lunchM;                    // fin de jornada pagada (reloj)
-  var late=Math.max(0, arr-jStart);             // minutos que llegas tarde al inicio
-  // Día normal pones 60 (30+30). Día de almacén, un tramo es de la empresa: solo 30.
-  var personal=(s.wh?30:60)+late;               // tu tiempo de viaje NO pagado
-  var baseDep=arr-tW;                           // saliste de la base por la mañana
-  var baseArr=baseDep+WD+lunchM+personal;       // vuelves a la base
-  var leave=baseArr-tW;                         // sales de obra
-  var homeReal=leave+tH;                         // llegas a tu casa (informativo)
+  var excess=Math.max(0, tW-30);                 // lo que pasa de tu media hora por tramo
+  var company=s.wh ? (tW+excess) : (2*excess);   // viaje que paga la empresa (cuenta como jornada)
+  var personal=2*tW-company;                     // lo que pones tú (tu viaje no pagado)
+  var leave=jStart+WD+lunchM-company;            // sales de obra
+  var baseArr=leave+tW;                          // vuelves a la base
+  var homeReal=leave+tH;                          // llegas a tu casa (informativo)
   var onSite=leave-arr;
   return {
-    jStart:toTime(jStart), arr:toTime(arr), leave:toTime(leave), jEnd:toTime(jEnd),
+    jStart:toTime(jStart), arr:toTime(arr), leave:toTime(leave),
     baseArr:toTime(baseArr), homeReal:toTime(homeReal), onSite:onSite,
-    late:late, personal:personal,
+    personal:personal,
     tW:tW, tH:tH, kmW:t.kmW, kmH:t.kmH, realW:t.realW, realH:t.realH
   };
 }
@@ -473,9 +469,8 @@ function render(){
   document.getElementById("trip-home").textContent=(r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ")+r.tH+" min"+(r.realH?" · carretera":"");
 
   var subLunch=s.lunch?" (incl. 1h comida)":"";
-  var lateTxt = r.late>0 ? " · llegas "+r.late+" min tarde" : "";
   document.getElementById("timeline").innerHTML =
-    trow("🏗️","Llegas a obra",r.arr,"Inicio jornada: "+r.jStart+lateTxt,"") +
+    trow("🏗️","Llegas a obra",r.arr,"Inicio jornada: "+r.jStart,"") +
     tdiv("En el tajo: "+fmt(r.onSite)+subLunch,true) +
     trow("🚪","Sales de obra",r.leave,"Pones "+fmt(r.personal)+" tuyos de viaje"+(s.wh?" (día de almacén)":""),"highlight") +
     trow("🏁","Llegas a la base",r.baseArr,"Vuelta a la empresa · fin del trabajo","official") +
