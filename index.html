@@ -250,7 +250,7 @@ input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
 
   <div class="footer">
     Lun–Jue: 8h &nbsp;·&nbsp; Viernes: 7h &nbsp;·&nbsp; La jornada cuenta desde obra<br>
-    Creado por <strong>Braulio</strong> · v12.0
+    Creado por <strong>Braulio</strong> · v13.0
   </div>
 
 </div>
@@ -301,7 +301,12 @@ input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
             <span class="lbl">Apertura</span>
             <input type="time" id="in-whopen" value="08:00" class="time-sm">
           </div>
+          <div style="flex:1">
+            <span class="lbl">Carga/descarga (min)</span>
+            <input type="number" id="in-whload" value="0" min="0" max="120" step="5" class="num-in" style="font-size:1.6rem;padding:10px 8px">
+          </div>
         </div>
+        <div style="font-size:.7rem;color:var(--text3);line-height:1.5;margin-top:6px">Minutos que tardas en cargar/descargar en el almacén. Se adelanta la salida de obra para llegar con ese margen antes del fin.</div>
         <div id="whlunch-box" style="display:flex;gap:10px;margin-top:12px">
           <div style="flex:1"><span class="lbl">Comida desde</span><input type="time" id="in-whfrom" value="14:00" class="time-sm"></div>
           <div style="flex:1"><span class="lbl">hasta</span><input type="time" id="in-whto" value="15:00" class="time-sm"></div>
@@ -338,7 +343,7 @@ var STEP=5, MIN_T=5, MAX_T=300, ROAD=1.3;
 var state = {
   diaIdx: diaHoy(), jstart:"08:00", arrival:"08:00",
   lunch:false, wh:false,
-  whOpen:"08:00", whFrom:"14:00", whTo:"15:00", whInt:false,
+  whOpen:"08:00", whFrom:"14:00", whTo:"15:00", whInt:false, whLoad:0,
   base:null, casa:null, obra:null,
   speed:90, workManual:null,
   osrm:{work:null, home:null}   // distancias reales por carretera (km), si hay conexión
@@ -355,6 +360,7 @@ function load(){
     var wf=localStorage.getItem("jornada_whfrom"); if(wf) state.whFrom=wf;
     var wt=localStorage.getItem("jornada_whto");   if(wt) state.whTo=wt;
     var wi=localStorage.getItem("jornada_whint");  if(wi) state.whInt=(wi==="1");
+    var wl=localStorage.getItem("jornada_whload"); if(wl) state.whLoad=+wl;
   }catch(e){}
 }
 function save(key,val){ try{ localStorage.setItem(key, typeof val==="object"?JSON.stringify(val):val); }catch(e){} }
@@ -419,14 +425,16 @@ function calculate(){
   var excess=Math.max(0, tW-30);                 // lo que pasa de tu media hora por tramo
   var company=s.wh ? (tW+excess) : (2*excess);   // viaje que paga la empresa (cuenta como jornada)
   var personal=2*tW-company;                     // lo que pones tú (tu viaje no pagado)
-  var leave=jStart+WD+lunchM-company;            // sales de obra
-  var baseArr=leave+tW;                          // vuelves a la base
-  var homeReal=leave+tH;                          // llegas a tu casa (informativo)
+  var load=(s.wh && s.whLoad>0) ? s.whLoad : 0;  // carga/descarga en el almacén (solo día de almacén)
+  var leave=jStart+WD+lunchM-company-load;       // sales de obra (adelantada por la carga)
+  var baseArr=leave+tW;                          // llegas a la base/almacén (empiezas a cargar)
+  var finBase=baseArr+load;                      // terminas de cargar y sales de la base (fin)
+  var homeReal=(s.wh?finBase:leave)+tH;          // llegas a tu casa (informativo)
   var onSite=leave-arr;
   return {
     jStart:toTime(jStart), arr:toTime(arr), leave:toTime(leave),
-    baseArr:toTime(baseArr), homeReal:toTime(homeReal), onSite:onSite,
-    personal:personal,
+    baseArr:toTime(baseArr), finBase:toTime(finBase), homeReal:toTime(homeReal),
+    onSite:onSite, personal:personal, load:load,
     tW:tW, tH:tH, kmW:t.kmW, kmH:t.kmH, realW:t.realW, realH:t.realH
   };
 }
@@ -469,18 +477,24 @@ function render(){
   document.getElementById("trip-home").textContent=(r.kmH!=null?(Math.round(r.kmH)+" km · "):"sin casa/obra · ")+r.tH+" min"+(r.realH?" · carretera":"");
 
   var subLunch=s.lunch?" (incl. 1h comida)":"";
-  document.getElementById("timeline").innerHTML =
+  var tl =
     trow("🏗️","Llegas a obra",r.arr,"Inicio jornada: "+r.jStart,"") +
     tdiv("En el tajo: "+fmt(r.onSite)+subLunch,true) +
-    trow("🚪","Sales de obra",r.leave,"Pones "+fmt(r.personal)+" tuyos de viaje"+(s.wh?" (día de almacén)":""),"highlight") +
-    trow("🏁","Llegas a la base",r.baseArr,"Vuelta a la empresa · fin del trabajo","official") +
-    trow("🏠","Llegas a tu casa",r.homeReal,"Informativo · NO es el fin de jornada","");
+    trow("🚪","Sales de obra",r.leave,"Pones "+fmt(r.personal)+" tuyos de viaje"+(s.wh?" (día de almacén)":""),"highlight");
+  if(s.wh && r.load>0){
+    tl += trow("🏭","Llegas al almacén",r.baseArr,"Cargas/descargas "+r.load+" min","") +
+          trow("🏁","Sales del almacén",r.finBase,"Fin del trabajo","official");
+  } else {
+    tl += trow("🏁","Llegas a la base",r.finBase,"Vuelta a la empresa · fin del trabajo","official");
+  }
+  tl += trow("🏠","Llegas a tu casa",r.homeReal,"Informativo · NO es el fin de jornada","");
+  document.getElementById("timeline").innerHTML = tl;
 
   document.getElementById("stats").innerHTML =
     stat("Jornada", isVie?"7h (viernes)":"8h", isVie?"var(--orange)":"var(--accent-l)") +
     stat("Comida", s.lunch?"1h (no computa)":"Sin parada", s.lunch?"var(--danger)":"var(--text3)") +
     stat("Sales de obra", r.leave, "var(--green-l)") +
-    stat("Llegas a la base", r.baseArr, "var(--accent-l)") +
+    stat(s.wh&&r.load>0?"Sales del almacén":"Llegas a la base", r.finBase, "var(--accent-l)") +
     stat("Llegas a tu casa", r.homeReal, "var(--green-l)") +
     stat("Pones tú (viaje)", fmt(r.personal), "var(--danger)");
 }
@@ -615,6 +629,7 @@ document.getElementById("in-whopen").addEventListener("change",function(){ state
 document.getElementById("in-whfrom").addEventListener("change",function(){ state.whFrom=this.value; save("jornada_whfrom",this.value); render(); });
 document.getElementById("in-whto").addEventListener("change",function(){ state.whTo=this.value; save("jornada_whto",this.value); render(); });
 document.getElementById("in-whint").addEventListener("change",function(){ state.whInt=this.checked; save("jornada_whint",this.checked?"1":"0"); render(); });
+document.getElementById("in-whload").addEventListener("change",function(){ var v=parseInt(this.value,10); if(isNaN(v)||v<0)v=0; state.whLoad=v; save("jornada_whload",v); render(); });
 
 // Mapa
 document.getElementById("map-close").addEventListener("click",closeMap);
@@ -638,6 +653,7 @@ document.getElementById("in-whopen").value=state.whOpen;
 document.getElementById("in-whfrom").value=state.whFrom;
 document.getElementById("in-whto").value=state.whTo;
 document.getElementById("in-whint").checked=state.whInt;
+document.getElementById("in-whload").value=state.whLoad;
 render();
 updateRoutes();   // si ya hay casa/base guardadas, intenta ruta real al arrancar
 

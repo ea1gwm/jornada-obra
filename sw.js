@@ -1,4 +1,4 @@
-const CACHE = 'jornada-v12';
+const CACHE = 'jornada-v13';
 const ASSETS = ['./', './jornada-obra.html', './manifest.json'];
 
 self.addEventListener('install', e => {
