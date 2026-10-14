@@ -266,7 +266,7 @@ input[type=time].time-sm{font-size:1.6rem;padding:10px 8px}
 
   <div class="footer">
     Lun–Jue: 8h &nbsp;·&nbsp; Viernes: 7h &nbsp;·&nbsp; La jornada cuenta desde obra<br>
-    Creado por <strong>Braulio</strong> · v14.0
+    Creado por <strong>Braulio</strong> · v15.0
   </div>
 
 </div>
@@ -390,13 +390,17 @@ function load(){
 }
 function savePlaces(){ try{ localStorage.setItem("jornada_places", JSON.stringify(state.places)); }catch(e){} }
 function escapeHtml(s){ return (s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+function placeInfo(p){
+  var est = state.base ? kmToMin(roadKm(state.base,{lat:p.lat,lon:p.lon})) : null;
+  return (est!=null?" · ~"+est+"min":"") + (p.empresa?" · empresa "+p.empresa+"min":"");
+}
 function renderPlaces(){
   var sel=document.getElementById("place-select");
   sel.innerHTML='<option value="">— Cargar sitio guardado —</option>'+
-    state.places.map(function(p,i){return '<option value="'+i+'">📍 '+escapeHtml(p.name)+'</option>';}).join("");
+    state.places.map(function(p,i){return '<option value="'+i+'">📍 '+escapeHtml(p.name)+placeInfo(p)+'</option>';}).join("");
   var list=document.getElementById("places-list");
   list.innerHTML=state.places.map(function(p,i){
-    return '<div class="place-row"><span>📍 '+escapeHtml(p.name)+'</span><button class="place-del" data-i="'+i+'">🗑️</button></div>';
+    return '<div class="place-row"><span>📍 '+escapeHtml(p.name)+'<span style="color:var(--text3);font-size:.78rem">'+placeInfo(p)+'</span></span><button class="place-del" data-i="'+i+'">🗑️</button></div>';
   }).join("");
   document.getElementById("places-empty").style.display=state.places.length?"none":"block";
   list.querySelectorAll(".place-del").forEach(function(b){
@@ -654,13 +658,17 @@ document.getElementById("map-obra").addEventListener("click",function(){ openMap
 document.getElementById("place-select").addEventListener("change",function(){
   if(this.value==="") return;
   var p=state.places[+this.value];
-  if(p) setLoc("obra",{lat:p.lat,lon:p.lon});
+  if(p){
+    state.empresa = p.empresa || null;
+    document.getElementById("in-empresa").value = p.empresa || "";
+    setLoc("obra",{lat:p.lat,lon:p.lon});   // setLoc ya renderiza
+  }
   this.value="";
 });
 document.getElementById("place-save").addEventListener("click",function(){
   if(!state.obra){ alert("Primero marca el destino (mapa, GPS o coordenadas)."); return; }
   var name=prompt("Nombre del sitio:"); if(!name||!name.trim()) return;
-  state.places.push({name:name.trim(), lat:state.obra.lat, lon:state.obra.lon});
+  state.places.push({name:name.trim(), lat:state.obra.lat, lon:state.obra.lon, empresa:state.empresa||null});
   savePlaces(); renderPlaces();
 });
 
